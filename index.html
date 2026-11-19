@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Στατιστικά Μπάσκετ</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#0e131d;--panel:#171e2c;--panel2:#1f2839;--line:#2a3448;
+  --text:#e9edf4;--muted:#8d97ab;--accent:#ff7a1a;--accent2:#ffb36b;
+  --good:#2fbf71;--bad:#e5484d;--warn:#f5b83d;--on:#163a2a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+input,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);
+  border-radius:8px;padding:9px 10px;width:100%}
+header{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel);
+  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+header h1{font-size:16px;margin:0;white-space:nowrap}
+header h1 span{color:var(--accent)}
+.tabs{display:flex;gap:4px;margin-left:auto}
+@media (max-width:440px){header h1 span{display:none}}
+.tab{white-space:nowrap;background:transparent;padding:7px 11px;border-radius:8px;color:var(--muted);font-weight:600}
+.tab.act{background:var(--panel2);color:var(--text)}
+main{max-width:1200px;margin:0 auto;padding:12px}
+.hidden{display:none!important}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--panel2);border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1b0d00}
+.btn.danger{background:transparent;border-color:var(--bad);color:#ff8d90}
+.btn:disabled{opacity:.45}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label.f{display:block;font-size:12px;color:var(--muted)}
+label.f input{margin-top:4px}
+.drop{display:block;border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--accent)}
+.drop b{color:var(--accent2)}
+table{border-collapse:collapse;width:100%}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+td.l,th.l{text-align:left}
+tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.scroll{overflow-x:auto}
+
+/* game */
+.board{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;padding:10px;position:sticky;top:54px;z-index:10}
+.team{text-align:center}
+.team .tn{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.team .sc{font-size:34px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.team .tf{font-size:11px;color:var(--muted)}
+.opp-btns{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.opp-btns button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:4px 8px;font-size:13px;font-weight:700}
+.clockbox{text-align:center}
+.clock{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;background:#0a0e15;border-radius:8px;
+  padding:2px 12px;color:var(--accent2);cursor:pointer}
+.clock.run{color:#7dffb4}
+.per{font-size:12px;color:var(--muted);margin:3px 0}
+.playbtn{background:var(--accent);color:#1b0d00;font-weight:800;border-radius:8px;padding:6px 16px}
+.playbtn.run{background:var(--bad);color:#fff}
+.bar{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.bar .btn{padding:8px 12px;font-size:14px}
+.btn.toggled{background:var(--good);border-color:var(--good);color:#04210f}
+.gamegrid{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:820px){.gamegrid{grid-template-columns:1.35fr 1fr}.acts{position:sticky;top:190px;align-self:start}}
+.players{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:7px}
+.pc{background:var(--panel);border:2px solid var(--line);border-radius:11px;padding:7px 8px;text-align:left;
+  display:flex;flex-direction:column;gap:1px;min-height:74px;position:relative}
+.pc .num{font-size:20px;font-weight:800;color:var(--accent2);line-height:1}
+.pc .nm{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc .st{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pc .st b{color:var(--text)}
+.pc.on{background:var(--on);border-color:#2a6b4b}
+.pc.on::after{content:"ΣΤΟ ΓΗΠΕΔΟ";position:absolute;top:6px;right:7px;font-size:9px;font-weight:800;color:#6fe0a3;letter-spacing:.3px}
+.pc.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.pc .f4{color:var(--warn)!important;font-weight:700}
+.pc .f5{color:var(--bad)!important;font-weight:800}
+.acts{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}
+.selinfo{font-size:13px;color:var(--muted);margin-bottom:8px;min-height:20px}
+.selinfo b{color:var(--accent2)}
+.agrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.agrid .full{grid-column:span 2}
+.ab{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px 6px;font-weight:700;font-size:15px}
+.ab.make{background:#123b27;border-color:#1f6b45;color:#9ff0c4}
+.ab.miss{background:#3a1719;border-color:#6b2427;color:#ffb3b5}
+.ab.bad{color:#ffc56b}
+.ab.pend{outline:3px solid var(--accent);outline-offset:-3px}
+.agrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.log{margin-top:12px}
+.log div{padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}
+.log .tm{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:6px}
+.empty{text-align:center;padding:30px 10px;color:var(--muted)}
+
+.ha{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--panel2);border:1px solid var(--line);
+  border-radius:999px;padding:4px;max-width:380px}
+.ha button{position:relative;z-index:1;background:transparent;padding:10px 8px;font-weight:700;color:var(--muted);transition:color .2s}
+.ha-knob{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:var(--accent);transition:transform .25s ease}
+.ha.away .ha-knob{transform:translateX(100%)}
+.ha:not(.away) [data-ha="home"],.ha.away [data-ha="away"]{color:#1b0d00}
+.board .us{order:1}.board .clockbox{order:2}.board .them{order:3}
+.board.away .us{order:3}.board.away .them{order:1}
+.team .ha-tag{font-size:10px;font-weight:800;letter-spacing:.4px;color:var(--accent2)}
+#otBtn{border-color:var(--accent);color:var(--accent2)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.mbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;max-width:380px;width:100%}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#000c;border:1px solid var(--line);
+  padding:9px 16px;border-radius:999px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:92vw;text-align:center}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏀 <span>Στατιστικά</span></h1>
+  <nav class="tabs">
+    <button class="tab act" data-v="roster">Ρόστερ</button>
+    <button class="tab" data-v="game">Αγώνας</button>
+    <button class="tab" data-v="box">Box score</button>
+  </nav>
+</header>
+
+<main>
+<!-- ROSTER -->
+<section id="v-roster">
+  <div class="card">
+    <h2>1. Εισαγωγή ρόστερ από Excel</h2>
+    <p class="muted small" style="margin-top:0">Αρχείο με 3 στήλες: <b>Επώνυμο</b> · <b>Όνομα</b> · <b>Αριθμός</b>, μία γραμμή για κάθε παίκτη. Η γραμμή επικεφαλίδων είναι προαιρετική.</p>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".xlsx,.xls,.csv,.ods" hidden>
+      <div style="font-size:26px">📄</div>
+      <div><b>Πάτα για να διαλέξεις αρχείο</b> ή σύρε το εδώ</div>
+      <div class="muted small">.xlsx, .xls, .csv</div>
+    </label>
+    <div class="row" style="margin-top:10px">
+      <button class="btn hidden" id="tplBtn">⬇ Πρότυπο Excel</button>
+      <span class="muted small" id="importMsg"></span>
+    </div>
+  </div>
+
+  <div class="card" id="rosterCard">
+    <h2>Ρόστερ <span class="muted" id="rosterCount"></span></h2>
+    <div id="rosterTable"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Στοιχεία αγώνα</h2>
+    <div class="grid2">
+      <label class="f">Αντίπαλος<input id="sOpp" placeholder="Όνομα αντιπάλου"></label>
+      <label class="f">Ημερομηνία<input id="sDate" type="date"></label>
+    </div>
+    <div style="margin-top:12px">
+      <div class="f muted small" style="margin-bottom:6px">HMTY BC παίζει:</div>
+      <div class="ha" id="haSwitch" role="switch">
+        <div class="ha-knob"></div>
+        <button data-ha="home">🏠 Εντός (Home)</button>
+        <button data-ha="away">✈️ Εκτός (Away)</button>
+      </div>
+    </div>
+    <p class="muted small" style="margin-bottom:0">Διάρκεια: 4 περίοδοι × 10 λεπτά · παράταση 5 λεπτά</p>
+    <div class="row" style="margin-top:14px">
+      <button class="btn primary" id="goGame">Πάμε στον αγώνα ▶</button>
+      <button class="btn danger" id="resetGame">Νέος αγώνας (μηδενισμός)</button>
+    </div>
+  </div>
+</section>
+
+<!-- GAME -->
+<section id="v-game" class="hidden">
+  <div id="noRoster" class="card empty">Πρώτα φόρτωσε το ρόστερ από το Excel στην καρτέλα <b>Ρόστερ</b>.</div>
+  <div id="gameUI">
+    <div class="board">
+      <div class="team us">
+        <div class="ha-tag" id="tagUs">HOME</div>
+        <div class="tn" id="bTeam">HMTY BC</div>
+        <div class="sc" id="bUs">0</div>
+        <div class="tf" id="bTF">Ομαδικά φάουλ: 0</div>
+      </div>
+      <div class="clockbox">
+        <div class="clock" id="clock" title="Πάτα για διόρθωση">10:00</div>
+        <div class="per" id="per">1η περίοδος</div>
+        <button class="playbtn" id="play">▶ Έναρξη</button>
+      </div>
+      <div class="team them">
+        <div class="ha-tag" id="tagThem">AWAY</div>
+        <div class="tn" id="bOpp">Αντίπαλος</div>
+        <div class="sc" id="bThem">0</div>
+        <div class="opp-btns"><button data-o="1">+1</button><button data-o="2">+2</button><button data-o="3">+3</button></div>
+      </div>
+    </div>
+    <div class="bar">
+      <button class="btn" id="subBtn">🔁 Αλλαγές <span id="onCount">(0/5)</span></button>
+      <button class="btn" id="undo">↶ Αναίρεση</button>
+      <button class="btn" id="nextPer">Επόμενη περίοδος ⏭</button>
+      <button class="btn hidden" id="otBtn">＋ Παράταση (5')</button>
+    </div>
+    <div class="gamegrid">
+      <div>
+        <div class="muted small" id="hint" style="margin-bottom:6px"></div>
+        <div class="players" id="players"></div>
+      </div>
+      <div class="acts">
+        <div class="selinfo" id="selinfo"></div>
+        <div class="agrid" id="agrid"></div>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOX -->
+<section id="v-box" class="hidden">
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0" id="boxTitle">Box score</h2>
+      <div class="row">
+        <button class="btn primary hidden" id="xlsBtn">⬇ Εξαγωγή Excel</button>
+        <button class="btn" id="copyBtn">📋 Αντιγραφή</button>
+      </div>
+    </div>
+    <div class="muted small" id="boxSub" style="margin:6px 0 10px"></div>
+    <div class="scroll" id="boxTable"></div>
+    <p class="muted small" style="margin-bottom:0">Λεπτά = χρόνος στο γήπεδο όσο τρέχει το ρολόι. +/- = διαφορά πόντων όσο ο παίκτης ήταν στο γήπεδο.</p>
+  </div>
+</section>
+</main>
+
+<div id="modal" class="hidden"><div class="mbox"><div id="mbody"></div>
+  <div class="mbtns"><button class="btn" id="mcancel">Άκυρο</button><button class="btn primary" id="mok">OK</button></div></div></div>
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY = 'basket_stats_v1';
+
+const ACTIONS = [
+  {k:'2m', l:'2Π ✓', c:'make'}, {k:'2x', l:'2Π ✗', c:'miss'},
+  {k:'3m', l:'3Π ✓', c:'make'}, {k:'3x', l:'3Π ✗', c:'miss'},
+  {k:'1m', l:'Βολή ✓', c:'make'}, {k:'1x', l:'Βολή ✗', c:'miss'},
+];
+const ACTIONS2 = [
+  {k:'or', l:'Επ. ριμπ.'}, {k:'dr', l:'Αμ. ριμπ.'}, {k:'as', l:'Ασίστ'},
+  {k:'st', l:'Κλέψιμο'}, {k:'bl', l:'Κόψιμο'}, {k:'to', l:'Λάθος', c:'bad'},
+  {k:'pf', l:'Φάουλ', c:'bad'},
+];
+const LABEL = Object.fromEntries([...ACTIONS, ...ACTIONS2].map(a => [a.k, a.l]));
+const SHOTS = ['2m','2x','3m','3x','1m','1x'];
+
+const TEAM = 'HMTY BC', PER_LEN = 10, N_PER = 4, OT_LEN = 5;
+function freshGame(prev) {
+  return { team: TEAM, home: prev?.home ?? true, opp: '', date: new Date().toISOString().slice(0,10),
+    perLen: PER_LEN, nPer: N_PER, otLen: OT_LEN,
+    per: 1, secLeft: PER_LEN * 60, running: false, on: [], secs: {}, events: [], seq: 0 };
+}
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.roster && s.game) {
+    Object.assign(s.game, { running: false, team: TEAM, perLen: PER_LEN, nPer: N_PER, otLen: OT_LEN });
+    if (s.game.home === undefined) s.game.home = true; return s; } } catch (e) {}
+  return null;
+}
+let S = load() || { roster: [], game: freshGame() };
+let saveT = null;
+function save(now) {
+  clearTimeout(saveT);
+  const f = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+  now ? f() : (saveT = setTimeout(f, 400));
+}
+
+let view = 'roster', sel = null, pend = null, subMode = false;
+
+/* ---------- toast & modal ---------- */
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800); }
+function ask(html, okLabel, onOk, danger) {
+  $('#mbody').innerHTML = html; $('#mok').textContent = okLabel || 'OK';
+  $('#mok').className = 'btn ' + (danger ? 'danger' : 'primary');
+  $('#modal').classList.remove('hidden');
+  $('#mok').onclick = () => { if (onOk && onOk() === false) return; $('#modal').classList.add('hidden'); };
+  $('#mcancel').onclick = () => $('#modal').classList.add('hidden');
+}
+
+/* ---------- helpers ---------- */
+const fmtClock = s => { const t = Math.max(0, Math.ceil(s - 1e-6)); return String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0'); };
+const fmtMin = s => { const t = Math.floor(s || 0); return Math.floor(t/60) + ':' + String(t%60).padStart(2,'0'); };
+const perName = p => p <= S.game.nPer ? `${p}η περίοδος` : `Παράταση ${p - S.game.nPer}`;
+const perShort = p => p <= S.game.nPer ? `${p}Π` : `OT${p - S.game.nPer}`;
+const player = id => S.roster.find(p => p.id === id);
+const pName = p => p ? `#${p.num} ${p.last}` : '?';
+const pct = (m, a) => a ? Math.round(m / a * 1000) / 10 : null;
+const pctTxt = (m, a) => a ? pct(m, a) + '%' : '–';
+
+function stats() {
+  const st = {};
+  S.roster.forEach(p => st[p.id] = {pts:0,'2m':0,'2a':0,'3m':0,'3a':0,'1m':0,'1a':0,or:0,dr:0,as:0,st:0,bl:0,to:0,pf:0,pm:0});
+  let us = 0, them = 0;
+  for (const e of S.game.events) {
+    if (e.k === 'opp') { them += e.pts; e.on.forEach(id => st[id] && (st[id].pm -= e.pts)); continue; }
+    const s = st[e.p]; if (!s) continue;
+    if (SHOTS.includes(e.k)) {
+      const n = e.k[0]; s[n + 'a']++;
+      if (e.k[1] === 'm') { s[n + 'm']++; s.pts += +n; us += +n; e.on.forEach(id => st[id] && (st[id].pm += +n)); }
+    } else s[e.k]++;
+  }
+  return { st, us, them };
+}
+
+/* ---------- Excel import ---------- */
+function parseRows(rows) {
+  rows = rows.map(r => (r || []).map(c => String(c ?? '').trim())).filter(r => r.some(c => c));
+  if (!rows.length) return [];
+  const hdr = /επ[ωώ]νυμ|ονομ|όνομ|αριθμ|surname|name|number|^no\.?$|^#$/i;
+  if (rows[0].slice(0,3).some(c => hdr.test(c))) rows.shift();
+  return rows.filter(r => r[0] || r[1]).map((r, i) => ({
+    id: 'p' + Date.now().toString(36) + i,
+    last: r[0] || '', first: r[1] || '',
+    num: (r[2] || '').replace(/\.0+$/, '')
+  })).sort((a, b) => (parseInt(a.num) || 999) - (parseInt(b.num) || 999) || a.last.localeCompare(b.last, 'el'));
+}
+function parseCSV(text) {
+  const lines = text.replace(/^﻿/, '').split(/\r?\n/);
+  const sep = (lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length ? ';' : (lines[0].includes('\t') ? '\t' : ',');
+  return lines.map(l => l.split(sep).map(c => c.replace(/^"|"$/g, '')));
+}
+async function importFile(f) {
+  if (!f) return;
+  try {
+    let rows;
+    if (/\.csv$/i.test(f.name) && typeof XLSX === 'undefined') rows = parseCSV(await f.text());
+    else {
+      if (typeof XLSX === 'undefined') throw new Error('Δεν φορτώθηκε η βιβλιοθήκη Excel. Έλεγξε τη σύνδεση και ξαναφόρτωσε τη σελίδα.');
+      const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+      rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '', raw: false });
+    }
+    const roster = parseRows(rows);
+    if (!roster.length) throw new Error('Δεν βρέθηκαν παίκτες στο αρχείο.');
+    const apply = () => {
+      S.roster = roster; S.game = Object.assign(freshGame(S.game), { team: S.game.team, opp: S.game.opp, date: S.game.date });
+      sel = pend = null; save(true); renderAll();
+      $('#importMsg').textContent = `✓ Φορτώθηκαν ${roster.length} παίκτες από «${f.name}»`;
+    };
+    if (S.game.events.length) ask(`<b>Νέο ρόστερ;</b><p class="muted">Ο τρέχων αγώνας έχει καταγραφές που θα μηδενιστούν.</p>`, 'Φόρτωση', apply, true);
+    else apply();
+  } catch (e) { $('#importMsg').textContent = '⚠ ' + e.message; }
+  $('#file').value = '';
+}
+$('#file').onchange = e => importFile(e.target.files[0]);
+const drop = $('#drop');
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); importFile(e.dataTransfer.files[0]); };
+
+/* ---------- downloads capability ---------- */
+let DL = null;
+(async () => {
+  for (let i = 0; i < 50 && !(window.claude && window.claude.use); i++) await new Promise(r => setTimeout(r, 100));
+  try { if (window.claude && window.claude.use) DL = await window.claude.use('downloads'); } catch (e) { DL = null; }
+  const standalone = window.top === window.self;
+  if ((DL || standalone) && typeof XLSX !== 'undefined') { $('#tplBtn').classList.remove('hidden'); $('#xlsBtn').classList.remove('hidden'); }
+})();
+async function saveXlsx(wb, name) {
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  if (!DL) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000); return;
+  }
+  try { await DL.save({ filename: name, data: buf }); toast('✓ Αποθηκεύτηκε'); }
+  catch (e) { if (e && e.code !== 'declined') toast('Η αποθήκευση δεν είναι διαθέσιμη εδώ'); }
+}
+$('#tplBtn').onclick = () => {
+  const ws = XLSX.utils.aoa_to_sheet([['Επώνυμο','Όνομα','Αριθμός'],['Παπαδόπουλος','Γιάννης',4],['Νικολάου','Κώστας',7],['Γεωργίου','Νίκος',12]]);
+  ws['!cols'] = [{wch:18},{wch:14},{wch:10}];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Ρόστερ');
+  saveXlsx(wb, 'roster_protypo.xlsx');
+};
+
+/* ---------- roster view ---------- */
+function renderRoster() {
+  const g = S.game;
+  $('#rosterCount').textContent = S.roster.length ? `(${S.roster.length} παίκτες)` : '';
+  $('#rosterTable').innerHTML = S.roster.length
+    ? `<div class="scroll"><table><tr><th>#</th><th class="l">Επώνυμο</th><th class="l">Όνομα</th></tr>${
+        S.roster.map(p => `<tr><td><b>${esc(p.num)}</b></td><td class="l">${esc(p.last)}</td><td class="l">${esc(p.first)}</td></tr>`).join('')}</table></div>`
+    : `<div class="empty">Δεν έχει φορτωθεί ρόστερ ακόμα.</div>`;
+  $('#sOpp').value = g.opp; $('#sDate').value = g.date;
+  $('#haSwitch').classList.toggle('away', !g.home); $('#haSwitch').setAttribute('aria-checked', String(!g.home));
+}
+$('#sOpp').oninput = e => { S.game.opp = e.target.value; save(); };
+$('#sDate').oninput = e => { S.game.date = e.target.value; save(); };
+$('#haSwitch').onclick = e => {
+  const b = e.target.closest('[data-ha]');
+  S.game.home = b ? b.dataset.ha === 'home' : !S.game.home;
+  save(true); renderRoster();
+};
+// home team first in titles
+const matchup = (us, them) => { const g = S.game, o = g.opp || 'Αντίπαλος';
+  return g.home ? `${TEAM} ${us} – ${them} ${o}` : `${o} ${them} – ${us} ${TEAM}`; };
+$('#goGame').onclick = () => setView('game');
+$('#resetGame').onclick = () => ask('<b>Νέος αγώνας;</b><p class="muted">Μηδενίζονται σκορ, ρολόι και στατιστικά. Το ρόστερ μένει.</p>', 'Μηδενισμός', () => {
+  S.game = Object.assign(freshGame(S.game), { team: S.game.team }); sel = pend = null; save(true); renderAll(); toast('Νέος αγώνας');
+}, true);
+
+/* ---------- game view ---------- */
+function renderGame() {
+  const has = S.roster.length > 0;
+  $('#noRoster').classList.toggle('hidden', has); $('#gameUI').classList.toggle('hidden', !has);
+  if (!has) return;
+  renderBoard(); renderPlayers(); renderActions(); renderLog();
+}
+function renderBoard() {
+  const g = S.game, { us, them } = stats();
+  $('#bTeam').textContent = TEAM; $('#bOpp').textContent = g.opp || 'Αντίπαλος';
+  document.querySelector('.board').classList.toggle('away', !g.home);
+  $('#tagUs').textContent = g.home ? 'HOME' : 'AWAY'; $('#tagThem').textContent = g.home ? 'AWAY' : 'HOME';
+  $('#nextPer').classList.toggle('hidden', g.per >= g.nPer);
+  $('#otBtn').classList.toggle('hidden', g.per < g.nPer);
+  $('#bUs').textContent = us; $('#bThem').textContent = them;
+  const tf = g.events.filter(e => e.k === 'pf' && e.per === g.per).length;
+  $('#bTF').textContent = 'Ομαδικά φάουλ: ' + tf; $('#bTF').style.color = tf >= 4 ? 'var(--warn)' : '';
+  $('#per').textContent = perName(g.per);
+  renderClock();
+  $('#onCount').textContent = `(${g.on.length}/5)`;
+  $('#subBtn').classList.toggle('toggled', subMode);
+}
+function renderClock() {
+  const g = S.game, c = $('#clock'), b = $('#play');
+  c.textContent = fmtClock(g.secLeft); c.classList.toggle('run', g.running);
+  b.textContent = g.running ? '⏸ Παύση' : '▶ Έναρξη'; b.classList.toggle('run', g.running);
+  document.querySelectorAll('[data-min]').forEach(el => el.textContent = fmtMin(g.secs[el.dataset.min]));
+}
+function renderPlayers() {
+  const g = S.game, { st } = stats();
+  let list = [...S.roster];
+  if (!subMode) list.sort((a, b) => (g.on.includes(b.id) - g.on.includes(a.id)));
+  $('#players').innerHTML = list.map(p => {
+    const s = st[p.id], on = g.on.includes(p.id);
+    const fc = s.pf >= 5 ? 'f5' : s.pf >= 4 ? 'f4' : '';
+    return `<button class="pc ${on ? 'on' : ''} ${sel === p.id ? 'sel' : ''}" data-id="${p.id}">
+      <span class="num">${esc(p.num) || '–'}</span>
+      <span class="nm">${esc(p.last)} ${p.first ? esc(p.first[0]) + '.' : ''}</span>
+      <span class="st"><b>${s.pts}</b> π · <span data-min="${p.id}">${fmtMin(g.secs[p.id])}</span> · <span class="${fc}">Φ${s.pf}</span></span>
+    </button>`;
+  }).join('');
+  $('#hint').innerHTML = subMode
+    ? '🔁 <b>Λειτουργία αλλαγών:</b> πάτα παίκτες για να μπουν/βγουν. Πάτα ξανά «Αλλαγές» όταν τελειώσεις.'
+    : (g.on.length === 0 ? '👉 Πάτα «Αλλαγές» και διάλεξε την αρχική πεντάδα.' : 'Πάτα παίκτη και μετά ενέργεια (ή ανάποδα).');
+}
+function renderActions() {
+  const btn = a => `<button class="ab ${a.c || ''} ${pend === a.k ? 'pend' : ''}" data-a="${a.k}">${a.l}</button>`;
+  const ag = $('#agrid'); ag.innerHTML = ACTIONS.map(btn).join('');
+  let g3 = $('#agrid3'); if (!g3) { g3 = document.createElement('div'); g3.id = 'agrid3'; g3.className = 'agrid3'; ag.after(g3); }
+  g3.innerHTML = ACTIONS2.map(btn).join('');
+  const p = player(sel);
+  $('#selinfo').innerHTML = p ? `Επιλογή: <b>${esc(pName(p))}</b> → διάλεξε ενέργεια`
+    : pend ? `Ενέργεια: <b>${esc(LABEL[pend])}</b> → διάλεξε παίκτη` : 'Διάλεξε παίκτη ή ενέργεια';
+}
+function renderLog() {
+  const ev = S.game.events.slice(-10).reverse();
+  $('#log').innerHTML = ev.length ? ev.map(e => {
+    const who = e.k === 'opp' ? `${esc(S.game.opp || 'Αντίπαλος')} +${e.pts}` : `${esc(pName(player(e.p)))} — ${esc(LABEL[e.k])}`;
+    return `<div><span class="tm">${perShort(e.per)} ${fmtClock(e.clock)}</span>${who}</div>`;
+  }).join('') : '<div class="muted">Καμία καταγραφή ακόμα.</div>';
+}
+function record(k, pid) {
+  const g = S.game;
+  g.events.push({ id: ++g.seq, k, p: pid, per: g.per, clock: Math.ceil(g.secLeft), on: [...g.on] });
+  const p = player(pid); sel = pend = null; save();
+  const { st } = stats();
+  if (k === 'pf' && st[pid].pf >= 5) toast(`⚠ ${pName(p)}: 5 φάουλ — αποβολή!`);
+  else toast(`${pName(p)}: ${LABEL[k]}`);
+  if (!g.on.includes(pid)) setTimeout(() => toast(`ℹ ${pName(p)} δεν είναι στο γήπεδο — μήπως ξέχασες αλλαγή;`), 1900);
+  renderBoard(); renderPlayers(); renderActions(); renderLog();
+}
+$('#players').onclick = e => {
+  const b = e.target.closest('.pc'); if (!b) return; const id = b.dataset.id, g = S.game;
+  if (subMode) {
+    advance();
+    if (g.on.includes(id)) g.on = g.on.filter(x => x !== id);
+    else { if (g.on.length >= 5) toast('Ήδη 5 στο γήπεδο — βγάλε πρώτα κάποιον'); else g.on.push(id); }
+    save(); renderBoard(); renderPlayers(); return;
+  }
+  if (pend) return record(pend, id);
+  sel = sel === id ? null : id; renderPlayers(); renderActions();
+};
+document.querySelector('.acts').addEventListener('click', e => {
+  const b = e.target.closest('.ab'); if (!b) return; const k = b.dataset.a;
+  if (subMode) { toast('Κλείσε πρώτα τις «Αλλαγές»'); return; }
+  if (sel) return record(k, sel);
+  pend = pend === k ? null : k; renderActions();
+});
+document.querySelector('.opp-btns').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return; const g = S.game;
+  g.events.push({ id: ++g.seq, k: 'opp', pts: +b.dataset.o, per: g.per, clock: Math.ceil(g.secLeft), on: [...g.on] });
+  save(); renderBoard(); renderPlayers(); renderLog(); toast(`${g.opp || 'Αντίπαλος'} +${b.dataset.o}`);
+};
+$('#subBtn').onclick = () => { subMode = !subMode; sel = pend = null; renderBoard(); renderPlayers(); renderActions(); };
+$('#undo').onclick = () => {
+  const e = S.game.events.pop(); if (!e) return toast('Τίποτα για αναίρεση');
+  save(); renderBoard(); renderPlayers(); renderLog();
+  toast('Αναιρέθηκε: ' + (e.k === 'opp' ? `αντίπαλος +${e.pts}` : `${pName(player(e.p))} ${LABEL[e.k]}`));
+};
+function goPeriod(np) {
+  const g = S.game; advance(); g.running = false; lastTs = null; g.per = np;
+  g.secLeft = (np <= g.nPer ? g.perLen : g.otLen) * 60; save(true); renderBoard();
+}
+$('#nextPer').onclick = () => {
+  const np = S.game.per + 1;
+  ask(`<b>Πάμε στην ${np}η περίοδο;</b><p class="muted">Το ρολόι θα σταματήσει και θα ξεκινήσει από ${PER_LEN}:00.</p>`, 'Επόμενη', () => goPeriod(np));
+};
+$('#otBtn').onclick = () => {
+  const g = S.game, np = g.per + 1, n = np - g.nPer;
+  ask(`<b>Προσθήκη ${n > 1 ? n + 'ης ' : ''}παράτασης;</b><p class="muted">Το ρολόι θα ξεκινήσει από ${OT_LEN}:00.</p>`, '＋ Παράταση', () => goPeriod(np));
+};
+
+/* ---------- clock ---------- */
+let lastTs = null;
+function advance() {
+  const g = S.game; if (!g.running || lastTs == null) return;
+  const now = performance.now(); let d = (now - lastTs) / 1000; lastTs = now;
+  if (d > g.secLeft) d = g.secLeft;
+  g.secLeft -= d; g.on.forEach(id => g.secs[id] = (g.secs[id] || 0) + d);
+  if (g.secLeft <= 0.001) { g.secLeft = 0; g.running = false; lastTs = null; toast('⏱ Τέλος ' + perName(g.per).toLowerCase()); renderBoard(); }
+}
+$('#play').onclick = () => {
+  const g = S.game;
+  if (g.running) { advance(); g.running = false; lastTs = null; }
+  else {
+    if (g.secLeft <= 0) return toast('Πήγαινε στην επόμενη περίοδο');
+    if (g.on.length < 5) toast(`Προσοχή: ${g.on.length} παίκτες στο γήπεδο`);
+    g.running = true; lastTs = performance.now();
+  }
+  save(true); renderClock();
+};
+$('#clock').onclick = () => {
+  const g = S.game; if (g.running) return toast('Σταμάτα πρώτα το ρολόι για διόρθωση');
+  ask(`<b>Διόρθωση ρολογιού</b><p class="muted small">Υπόλοιπος χρόνος περιόδου (λεπτά:δευτερόλεπτα)</p>
+    <input id="clkIn" value="${fmtClock(g.secLeft)}" inputmode="numeric" style="font-size:22px;text-align:center">`, 'Αποθήκευση', () => {
+    const m = $('#clkIn').value.trim().match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+    if (!m) { toast('Γράψε π.χ. 07:30'); return false; }
+    g.secLeft = Math.min(+m[1] * 60 + (+m[2] || 0), 99 * 60); save(true); renderClock();
+  });
+};
+setInterval(() => { if (S.game.running) { advance(); renderClock(); save(); } }, 250);
+document.addEventListener('visibilitychange', () => { advance(); save(true); });
+window.addEventListener('pagehide', () => { advance(); save(true); });
+
+/* ---------- box score ---------- */
+const BOX_HDR = ['#','Παίκτης','Λεπτά','Πόντοι','2Π','2Π%','3Π','3Π%','Βολές','Β%','Επ.Ρ','Αμ.Ρ','Σύν.Ρ','Ασίστ','Κλεψ.','Κοψ.','Λάθη','Φάουλ','+/-'];
+function boxRows() {
+  const { st, us, them } = stats(), g = S.game;
+  const tot = {pts:0,'2m':0,'2a':0,'3m':0,'3a':0,'1m':0,'1a':0,or:0,dr:0,as:0,st:0,bl:0,to:0,pf:0};
+  const rows = S.roster.map(p => {
+    const s = st[p.id]; Object.keys(tot).forEach(k => tot[k] += s[k]);
+    return { p, s, sec: g.secs[p.id] || 0 };
+  });
+  return { rows, tot, us, them };
+}
+function renderBox() {
+  const g = S.game, { rows, tot, us, them } = boxRows();
+  $('#boxTitle').textContent = matchup(us, them);
+  $('#boxSub').textContent = `${g.date || ''} · ${g.home ? 'Εντός' : 'Εκτός'} έδρας · ${perName(g.per)} · ${fmtClock(g.secLeft)}`;
+  if (!rows.length) { $('#boxTable').innerHTML = '<div class="empty">Δεν υπάρχει ρόστερ.</div>'; return; }
+  const sh = (m, a) => `${m}/${a}`;
+  const tr = (cells, cls) => `<tr class="${cls || ''}">${cells.map((c, i) => `<td class="${i === 1 ? 'l' : ''}">${c}</td>`).join('')}</tr>`;
+  const line = (num, name, sec, s, pm) => [num, name, sec == null ? '' : fmtMin(sec), `<b>${s.pts}</b>`,
+    sh(s['2m'], s['2a']), pctTxt(s['2m'], s['2a']), sh(s['3m'], s['3a']), pctTxt(s['3m'], s['3a']),
+    sh(s['1m'], s['1a']), pctTxt(s['1m'], s['1a']), s.or, s.dr, s.or + s.dr, s.as, s.st, s.bl, s.to, s.pf,
+    pm == null ? '' : (pm > 0 ? '+' + pm : pm)];
+  $('#boxTable').innerHTML = `<table><tr>${BOX_HDR.map((h, i) => `<th class="${i === 1 ? 'l' : ''}">${h}</th>`).join('')}</tr>` +
+    rows.map(r => tr(line(esc(r.p.num), esc(r.p.last + ' ' + r.p.first), r.sec, r.s, r.s.pm))).join('') +
+    tr(line('', 'ΣΥΝΟΛΟ', null, tot, null), 'tot') + '</table>';
+}
+function boxAoa() {
+  const g = S.game, { rows, tot, us, them } = boxRows();
+  const n = (m, a) => a ? pct(m, a) : '';
+  const line = (num, name, min, s, pm) => [num, name, min, s.pts, s['2m'], s['2a'], n(s['2m'], s['2a']), s['3m'], s['3a'], n(s['3m'], s['3a']),
+    s['1m'], s['1a'], n(s['1m'], s['1a']), s.or, s.dr, s.or + s.dr, s.as, s.st, s.bl, s.to, s.pf, pm];
+  return [
+    [matchup(us, them)], ['Ημερομηνία', g.date], ['Έδρα', g.home ? 'Εντός (Home)' : 'Εκτός (Away)'], [],
+    ['#','Επώνυμο Όνομα','Λεπτά','Πόντοι','2Π εύστ.','2Π προσπ.','2Π%','3Π εύστ.','3Π προσπ.','3Π%','Βολές εύστ.','Βολές προσπ.','Β%','Επ.Ρ','Αμ.Ρ','Σύν.Ρ','Ασίστ','Κλεψίματα','Κοψίματα','Λάθη','Φάουλ','+/-'],
+    ...rows.map(r => line(isNaN(+r.p.num) || r.p.num === '' ? r.p.num : +r.p.num, `${r.p.last} ${r.p.first}`, Math.round(r.sec / 6) / 10, r.s, r.s.pm)),
+    line('', 'ΣΥΝΟΛΟ', '', tot, '')
+  ];
+}
+$('#xlsBtn').onclick = () => {
+  const g = S.game, wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(boxAoa()); ws['!cols'] = [{wch:5},{wch:24}, ...Array(20).fill({wch:9})];
+  XLSX.utils.book_append_sheet(wb, ws, 'Box score');
+  const pbp = [['Περίοδος','Ρολόι','Παίκτης','Ενέργεια']].concat(g.events.map(e => e.k === 'opp'
+    ? [perShort(e.per), fmtClock(e.clock), g.opp || 'Αντίπαλος', `+${e.pts}`]
+    : [perShort(e.per), fmtClock(e.clock), pName(player(e.p)), LABEL[e.k]]));
+  const ws2 = XLSX.utils.aoa_to_sheet(pbp); ws2['!cols'] = [{wch:9},{wch:8},{wch:24},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Play-by-play');
+  const safe = s => String(s).replace(/[\\/:*?"<>|]+/g, '').trim();
+  saveXlsx(wb, `Agonas ${safe(g.date)} ${safe(g.opp || '')}`.trim() + '.xlsx');
+};
+$('#copyBtn').onclick = async () => {
+  const tsv = boxAoa().map(r => r.join('\t')).join('\n');
+  try { await navigator.clipboard.writeText(tsv); toast('✓ Αντιγράφηκε — κάνε επικόλληση σε Excel'); }
+  catch (e) { toast('Η αντιγραφή δεν επιτρέπεται εδώ'); }
+};
+
+/* ---------- views ---------- */
+function setView(v) {
+  view = v;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('act', t.dataset.v === v));
+  ['roster','game','box'].forEach(x => $('#v-' + x).classList.toggle('hidden', x !== v));
+  renderAll(); window.scrollTo(0, 0);
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => setView(t.dataset.v));
+function renderAll() { if (view === 'roster') renderRoster(); if (view === 'game') renderGame(); if (view === 'box') renderBox(); }
+
+setView(S.roster.length ? 'game' : 'roster');
+</script>
+</body>
+</html>
