@@ -283,16 +283,20 @@ const ACTIONS2 = [
 const LABEL = Object.fromEntries([...ACTIONS, ...ACTIONS2].map(a => [a.k, a.l]));
 const SHOTS = ['2m','2x','3m','3x','1m','1x'];
 
+// Today's date from the device clock, in local time (toISOString would give the UTC date)
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const TEAM = 'HMTY BC', PER_LEN = 10, N_PER = 4, OT_LEN = 5;
 function freshGame(prev) {
-  return { team: TEAM, home: prev?.home ?? true, opp: '', date: new Date().toISOString().slice(0,10),
+  return { team: TEAM, home: prev?.home ?? true, opp: '', date: today(),
     perLen: PER_LEN, nPer: N_PER, otLen: OT_LEN,
     per: 1, secLeft: PER_LEN * 60, running: false, on: [], secs: {}, events: [], seq: 0 };
 }
 function load() {
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.roster && s.game) {
     Object.assign(s.game, { running: false, team: TEAM, perLen: PER_LEN, nPer: N_PER, otLen: OT_LEN });
-    if (s.game.home === undefined) s.game.home = true; return s; } } catch (e) {}
+    if (s.game.home === undefined) s.game.home = true;
+    if (!s.game.events.length) s.game.date = today(); // game not started yet → today's date
+    return s; } } catch (e) {}
   return null;
 }
 let S = load() || { roster: [], game: freshGame() };
@@ -381,7 +385,7 @@ async function importFile(f) {
     const roster = parseRows(rows);
     if (!roster.length) throw new Error('Δεν βρέθηκαν παίκτες στο αρχείο.');
     const apply = () => {
-      S.roster = roster; S.game = Object.assign(freshGame(S.game), { team: S.game.team, opp: S.game.opp, date: S.game.date });
+      S.roster = roster; S.game = Object.assign(freshGame(S.game), { team: S.game.team, opp: S.game.opp });
       sel = pend = null; save(true); renderAll();
       $('#importMsg').textContent = `✓ Φορτώθηκαν ${roster.length} παίκτες από «${f.name}»`;
     };
@@ -425,7 +429,7 @@ const safeName = s => String(s).replace(/[\\/:*?"<>|]+/g, '').trim();
 $('#bkSave').onclick = () => {
   advance(); save(true);
   const data = JSON.stringify({ app: 'hmty-basket-stats', v: 1, saved: new Date().toISOString(), roster: S.roster, game: S.game }, null, 1);
-  saveFile(`HMTY_backup_${new Date().toISOString().slice(0,10)}.json`, data, 'application/json');
+  saveFile(`HMTY_backup_${today()}.json`, data, 'application/json');
 };
 $('#bkFile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
