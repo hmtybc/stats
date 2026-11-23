@@ -104,7 +104,37 @@ tr.tot td{font-weight:700;border-top:2px solid var(--line)}
 .agrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
 .agrid3 .ab{font-size:14px;padding:13px 3px;line-height:1.15}
 .log{margin-top:12px}
-.log div{padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}
+.loghd{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);padding-bottom:5px;border-bottom:1px solid var(--line)}
+.linkbtn{background:none;color:var(--accent2);font-weight:700;font-size:12px;padding:2px 4px}
+.lg{display:flex;gap:6px;align-items:center;width:100%;text-align:left;background:transparent;padding:7px 2px;border-bottom:1px solid var(--line);font-size:13px;border-radius:0}
+.lg:hover{background:#ffffff08}.lg .lw{flex:1}.lg .ed{color:var(--muted);font-size:14px}
+label.f select{margin-top:4px}
+tr.prow{cursor:pointer} tr.prow:hover td{background:#ffffff0a}
+#lineTable td.l{white-space:normal;min-width:150px}
+td .lnum{font-weight:800;color:var(--accent2)} td .lnm{display:block;font-size:11px;color:var(--muted)}
+#pview{position:fixed;inset:0;background:rgba(8,3,10,.8);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:45;overflow-y:auto;padding:14px}
+.pv{max-width:820px;margin:0 auto 30px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative;box-shadow:0 10px 40px #000a}
+#pvClose{position:absolute;top:12px;right:12px;padding:6px 12px}
+.pvtop{display:flex;gap:14px;align-items:center;margin:2px 52px 14px 0}
+.pvnum{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent-b),var(--logo));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;flex:none;box-shadow:0 0 0 2px #ffffff33}
+.pvname{font-size:21px}.pvname b{font-weight:900}
+.ptiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pt{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.pt b{display:block;font-size:25px;font-weight:900;font-variant-numeric:tabular-nums}
+.pt span{font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;margin:12px 0 4px}
+.pgrid div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding:7px 0;font-size:14px}
+.pgrid div span{color:var(--muted)}.pgrid div em{font-style:normal;color:var(--muted);font-size:12px;margin-left:6px}
+.pv h3{font-size:15px;margin:20px 0 8px}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--accent-b)}
+.pimgs{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
+.pimg{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:10px}
+.pthumb{border-radius:8px;overflow:hidden;background:#1a1020 conic-gradient(#ffffff14 25%,transparent 0 50%,#ffffff14 0 75%,transparent 0) 0 0/18px 18px}
+.pthumb img{width:100%;display:block}
+.pthumb.story{width:min(100%,240px);margin:0 auto}.pthumb.post{width:min(100%,320px);margin:0 auto}
+@media (min-width:640px){.ptiles{grid-template-columns:repeat(6,1fr)}.pgrid{grid-template-columns:repeat(3,1fr)}
+  .pimgs{grid-template-columns:1.6fr 1fr 1fr;align-items:start}.pthumb.story,.pthumb.post{width:100%}}
 .log .tm{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:6px}
 .empty{text-align:center;padding:30px 10px;color:var(--muted)}
 
@@ -250,14 +280,26 @@ tr.tot td{font-weight:700;border-top:2px solid var(--line)}
     <div class="muted small" id="boxSub" style="margin:6px 0 10px"></div>
     <div class="scroll" id="qTable" style="margin-bottom:12px"></div>
     <div class="scroll" id="boxTable"></div>
+    <div class="small" style="margin:10px 0 6px;color:var(--accent2)">👆 Πάτα έναν παίκτη για την καρτέλα του και εικόνες για Instagram.</div>
     <p class="muted small" style="margin-bottom:0">Λεπτά = χρόνος στο γήπεδο όσο τρέχει το ρολόι. +/- = διαφορά πόντων όσο ο παίκτης ήταν στο γήπεδο.<br>
     PIR (Αξιολόγηση) = Πόντοι + Ριμπ. + Ασίστ + Κλεψ. + Κοψ. + Κερδ. φάουλ − Άστοχα σουτ − Άστοχες βολές − Λάθη − Κοψ. που δέχτηκε − Φάουλ.</p>
+  </div>
+  <div class="card">
+    <h2>📈 Προχωρημένα στατιστικά</h2>
+    <div class="scroll" id="advTable"></div>
+    <p class="muted small" style="margin-bottom:0">Εντός πεδιάς = δίποντα + τρίποντα. eFG% = ευστοχία όπου το τρίποντο μετράει 1,5 φορά. TS% = πραγματική ευστοχία που λαμβάνει υπόψη και τις βολές. Ασ/Λαθ = ασίστ ανά λάθος.</p>
+  </div>
+  <div class="card">
+    <h2>👥 Πεντάδες</h2>
+    <div class="scroll" id="lineTable"></div>
+    <p class="muted small" style="margin-bottom:0">Λεπτά που έπαιξε μαζί κάθε σχήμα (όσο έτρεχε το ρολόι) και πόντοι υπέρ/κατά όσο ήταν στο γήπεδο.</p>
   </div>
 </section>
 </main>
 
 <div id="modal" class="hidden"><div class="mbox"><div id="mbody"></div>
   <div class="mbtns"><button class="btn" id="mcancel">Άκυρο</button><button class="btn primary" id="mok">OK</button></div></div></div>
+<div id="pview" class="hidden"><div class="pv"><button class="btn" id="pvClose">✕</button><div id="pvBody"></div></div></div>
 <div id="toast"></div>
 
 <script>
@@ -289,12 +331,13 @@ const TEAM = 'HMTY BC', PER_LEN = 10, N_PER = 4, OT_LEN = 5;
 function freshGame(prev) {
   return { team: TEAM, home: prev?.home ?? true, opp: '', date: today(),
     perLen: PER_LEN, nPer: N_PER, otLen: OT_LEN,
-    per: 1, secLeft: PER_LEN * 60, running: false, on: [], secs: {}, events: [], seq: 0 };
+    per: 1, secLeft: PER_LEN * 60, running: false, on: [], secs: {}, lineSecs: {}, events: [], seq: 0 };
 }
 function load() {
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.roster && s.game) {
     Object.assign(s.game, { running: false, team: TEAM, perLen: PER_LEN, nPer: N_PER, otLen: OT_LEN });
     if (s.game.home === undefined) s.game.home = true;
+    if (!s.game.lineSecs) s.game.lineSecs = {};
     if (!s.game.events.length) s.game.date = today(); // game not started yet → today's date
     return s; } } catch (e) {}
   return null;
@@ -455,7 +498,7 @@ function renderRoster() {
   $('#rosterCount').textContent = S.roster.length ? `(${S.roster.length} παίκτες)` : '';
   $('#rosterTable').innerHTML = S.roster.length
     ? `<div class="scroll"><table><tr><th>#</th><th class="l">Επώνυμο</th><th class="l">Όνομα</th></tr>${
-        S.roster.map(p => `<tr><td><b>${esc(p.num)}</b></td><td class="l">${esc(p.last)}</td><td class="l">${esc(p.first)}</td></tr>`).join('')}</table></div>`
+        S.roster.map(p => `<tr class="prow" data-pid="${p.id}"><td><b>${esc(p.num)}</b></td><td class="l">${esc(p.last)}</td><td class="l">${esc(p.first)}</td></tr>`).join('')}</table></div>`
     : `<div class="empty">Δεν έχει φορτωθεί ρόστερ ακόμα.</div>`;
   $('#sOpp').value = g.opp; $('#sDate').value = g.date;
   $('#haSwitch').classList.toggle('away', !g.home); $('#haSwitch').setAttribute('aria-checked', String(!g.home));
@@ -529,12 +572,38 @@ function renderActions() {
   $('#selinfo').innerHTML = p ? `Επιλογή: <b>${esc(pName(p))}</b> → διάλεξε ενέργεια`
     : pend ? `Ενέργεια: <b>${esc(LABEL[pend])}</b> → διάλεξε παίκτη` : 'Διάλεξε παίκτη ή ενέργεια';
 }
+let logAll = false;
 function renderLog() {
-  const ev = S.game.events.slice(-10).reverse();
-  $('#log').innerHTML = ev.length ? ev.map(e => {
-    const who = e.k === 'opp' ? `${esc(S.game.opp || 'Αντίπαλος')} +${e.pts}` : `${esc(pName(player(e.p)))} — ${esc(LABEL[e.k])}`;
-    return `<div><span class="tm">${perShort(e.per)} ${fmtClock(e.clock)}</span>${who}</div>`;
-  }).join('') : '<div class="muted">Καμία καταγραφή ακόμα.</div>';
+  const all = S.game.events, ev = (logAll ? all : all.slice(-10)).slice().reverse();
+  $('#log').innerHTML = `<div class="loghd"><span>Φάσεις (${all.length}) · πάτα μία για διόρθωση</span>${
+      all.length > 10 ? `<button class="linkbtn" id="logToggle">${logAll ? 'Λιγότερες' : 'Όλες'}</button>` : ''}</div>` +
+    (ev.length ? ev.map(e => {
+      const who = e.k === 'opp' ? `${esc(S.game.opp || 'Αντίπαλος')} +${e.pts}` : `${esc(pName(player(e.p)))} — ${esc(LABEL[e.k])}`;
+      return `<button class="lg" data-ev="${e.id}"><span class="tm">${perShort(e.per)} ${fmtClock(e.clock)}</span><span class="lw">${who}</span><span class="ed">✎</span></button>`;
+    }).join('') : '<div class="muted small" style="padding:6px 0">Καμία καταγραφή ακόμα.</div>');
+}
+$('#log').onclick = e => {
+  if (e.target.id === 'logToggle') { logAll = !logAll; return renderLog(); }
+  const b = e.target.closest('[data-ev]'); if (b) editEvent(+b.dataset.ev);
+};
+// Edit or delete any recorded play
+function editEvent(id) {
+  const g = S.game, e = g.events.find(x => x.id === id); if (!e) return;
+  const when = `<p class="muted small" style="margin:4px 0 12px">${perName(e.per)} · ${fmtClock(e.clock)}</p>`;
+  const del = `<button class="btn danger" id="evDel" style="width:100%;margin-top:14px">🗑 Διαγραφή φάσης</button>`;
+  const body = e.k === 'opp'
+    ? `<b>Πόντοι αντιπάλου</b>${when}<label class="f">Πόντοι<select id="evPts">${[1,2,3].map(n => `<option value="${n}" ${n === e.pts ? 'selected' : ''}>+${n}</option>`).join('')}</select></label>`
+    : `<b>Διόρθωση φάσης</b>${when}
+       <label class="f">Παίκτης<select id="evP">${S.roster.map(p => `<option value="${p.id}" ${p.id === e.p ? 'selected' : ''}>#${esc(p.num)} ${esc(p.last)} ${esc(p.first)}</option>`).join('')}</select></label>
+       <label class="f" style="margin-top:10px">Ενέργεια<select id="evK">${[...ACTIONS, ...ACTIONS2].map(a => `<option value="${a.k}" ${a.k === e.k ? 'selected' : ''}>${a.l}</option>`).join('')}</select></label>`;
+  ask(body + del, 'Αποθήκευση', () => {
+    if (e.k === 'opp') e.pts = +$('#evPts').value; else { e.p = $('#evP').value; e.k = $('#evK').value; }
+    save(true); renderAll(); toast('✓ Η φάση διορθώθηκε');
+  });
+  $('#evDel').onclick = () => {
+    g.events = g.events.filter(x => x !== e); $('#modal').classList.add('hidden');
+    save(true); renderAll(); toast('🗑 Η φάση διαγράφηκε');
+  };
 }
 function record(k, pid) {
   const g = S.game;
@@ -594,6 +663,7 @@ function advance() {
   const now = performance.now(); let d = (now - lastTs) / 1000; lastTs = now;
   if (d > g.secLeft) d = g.secLeft;
   g.secLeft -= d; g.on.forEach(id => g.secs[id] = (g.secs[id] || 0) + d);
+  if (g.on.length) { const k = lkey(g.on); g.lineSecs = g.lineSecs || {}; g.lineSecs[k] = (g.lineSecs[k] || 0) + d; }
   if (g.secLeft <= 0.001) { g.secLeft = 0; g.running = false; lastTs = null; toast('⏱ Τέλος ' + perName(g.per).toLowerCase()); renderBoard(); }
 }
 $('#play').onclick = () => {
@@ -649,16 +719,17 @@ function renderBox() {
   const Q = qData();
   $('#qTable').innerHTML = `<table><tr><th class="l">Σκορ ανά περίοδο</th>${Q.labels.map(l => `<th>${l}</th>`).join('')}<th>Σύνολο</th></tr>${
     Q.rows.map(r => `<tr><td class="l">${esc(r.name)}</td>${r.vals.map(v => `<td>${v == null ? '–' : v}</td>`).join('')}<td><b>${r.tot}</b></td></tr>`).join('')}</table>`;
-  if (!rows.length) { $('#boxTable').innerHTML = '<div class="empty">Δεν υπάρχει ρόστερ.</div>'; return; }
+  if (!rows.length) { $('#boxTable').innerHTML = '<div class="empty">Δεν υπάρχει ρόστερ.</div>'; $('#advTable').innerHTML = $('#lineTable').innerHTML = ''; return; }
   const sh = (m, a) => `${m}/${a}`;
-  const tr = (cells, cls) => `<tr class="${cls || ''}">${cells.map((c, i) => `<td class="${i === 1 ? 'l' : ''}">${c}</td>`).join('')}</tr>`;
+  const tr = (cells, cls, pid) => `<tr class="${cls || ''}" ${pid ? `data-pid="${pid}"` : ''}>${cells.map((c, i) => `<td class="${i === 1 ? 'l' : ''}">${c}</td>`).join('')}</tr>`;
   const line = (num, name, sec, s, pm) => [num, name, sec == null ? '' : fmtMin(sec), `<b>${s.pts}</b>`,
     sh(s['2m'], s['2a']), pctTxt(s['2m'], s['2a']), sh(s['3m'], s['3a']), pctTxt(s['3m'], s['3a']),
     sh(s['1m'], s['1a']), pctTxt(s['1m'], s['1a']), s.or, s.dr, s.or + s.dr, s.as, s.st, s.bl, s.fd, s.to, s.pf, s.ba,
     pm == null ? '' : signed(pm), `<b>${s.pir}</b>`];
   $('#boxTable').innerHTML = `<table><tr>${BOX_HDR.map((h, i) => `<th class="${i === 1 ? 'l' : ''}">${h}</th>`).join('')}</tr>` +
-    rows.map(r => tr(line(esc(r.p.num), esc(r.p.last + ' ' + r.p.first), r.sec, r.s, r.s.pm))).join('') +
+    rows.map(r => tr(line(esc(r.p.num), esc(r.p.last + ' ' + r.p.first), r.sec, r.s, r.s.pm), 'prow', r.p.id)).join('') +
     tr(line('', 'ΣΥΝΟΛΟ', null, tot, null), 'tot') + '</table>';
+  renderAdv(); renderLineups();
 }
 const fmtDate = d => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : (d || ''); };
 function boxAoa() {
@@ -685,6 +756,10 @@ $('#xlsBtn').onclick = () => {
     : [perShort(e.per), fmtClock(e.clock), pName(player(e.p)), LABEL[e.k]]));
   const ws2 = XLSX.utils.aoa_to_sheet(pbp); ws2['!cols'] = [{wch:9},{wch:8},{wch:24},{wch:14}];
   XLSX.utils.book_append_sheet(wb, ws2, 'Play-by-play');
+  const ws3 = XLSX.utils.aoa_to_sheet(advAoa()); ws3['!cols'] = [{wch:5},{wch:24}, ...Array(8).fill({wch:11})];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Προχωρημένα');
+  const ws4 = XLSX.utils.aoa_to_sheet(lineAoa()); ws4['!cols'] = [{wch:16},{wch:60}, ...Array(5).fill({wch:10})];
+  XLSX.utils.book_append_sheet(wb, ws4, 'Πεντάδες');
   saveXlsx(wb, `Agonas ${safeName(g.date)} ${safeName(g.opp || '')}`.trim() + '.xlsx');
 };
 $('#copyBtn').onclick = async () => {
@@ -785,6 +860,269 @@ $('#shareBtn').onclick = async () => {
   if (DL || STANDALONE) { await saveFile(name, blob, 'image/png'); if (!DL) toast('✓ Η εικόνα κατέβηκε'); return; }
   ask(`<b>Box score</b><p class="muted small">Πάτα παρατεταμένα την εικόνα για αποθήκευση.</p><img src="${url}" style="width:100%;border-radius:8px">`, 'Κλείσιμο');
 };
+
+/* ---------- advanced stats ---------- */
+function adv(s) {
+  const fgm = s['2m'] + s['3m'], fga = s['2a'] + s['3a'], tsa = fga + 0.44 * s['1a'];
+  return { fgm, fga,
+    fg: fga ? fgm / fga * 100 : null,
+    efg: fga ? (fgm + 0.5 * s['3m']) / fga * 100 : null,
+    ts: tsa ? s.pts / (2 * tsa) * 100 : null };
+}
+const pctF = v => v == null ? '–' : (Math.round(v * 10) / 10).toFixed(1) + '%';
+const atF = s => s.to ? (s.as / s.to).toFixed(2) : (s.as ? s.as + ':0' : '–');
+function renderAdv() {
+  const { rows, tot } = boxRows();
+  const line = (num, name, sec, s, pid, cls) => { const a = adv(s);
+    return `<tr class="${cls}" ${pid ? `data-pid="${pid}"` : ''}><td>${num}</td><td class="l">${name}</td><td>${sec == null ? '' : fmtMin(sec)}</td>
+      <td>${a.fgm}/${a.fga}</td><td>${pctF(a.fg)}</td><td><b>${pctF(a.efg)}</b></td><td><b>${pctF(a.ts)}</b></td><td>${atF(s)}</td></tr>`; };
+  $('#advTable').innerHTML = `<table><tr><th>#</th><th class="l">Παίκτης</th><th>Λεπτά</th><th>Εντός πεδ.</th><th>FG%</th><th>eFG%</th><th>TS%</th><th>Ασ/Λαθ</th></tr>` +
+    rows.map(r => line(esc(r.p.num), esc(r.p.last + ' ' + r.p.first), r.sec, r.s, r.p.id, 'prow')).join('') +
+    line('', 'ΣΥΝΟΛΟ', null, tot, null, 'tot') + '</table>';
+}
+function advAoa() {
+  const { rows, tot } = boxRows(), r1 = v => v == null ? '' : Math.round(v * 10) / 10;
+  const line = (num, name, s) => { const a = adv(s); return [num, name, a.fgm, a.fga, r1(a.fg), r1(a.efg), r1(a.ts), s.to ? Math.round(s.as / s.to * 100) / 100 : '']; };
+  return [['#', 'Επώνυμο Όνομα', 'Εντός πεδ. εύστ.', 'Εντός πεδ. προσπ.', 'FG%', 'eFG%', 'TS%', 'Ασίστ/Λάθη'],
+    ...rows.map(r => line(r.p.num, `${r.p.last} ${r.p.first}`, r.s)), line('', 'ΣΥΝΟΛΟ', tot)];
+}
+
+/* ---------- lineups ---------- */
+const lkey = ids => [...ids].sort().join(',');
+const byNum = (a, b) => (parseInt(a.num) || 999) - (parseInt(b.num) || 999);
+function lineups() {
+  const g = S.game, L = {};
+  const get = k => L[k] = L[k] || { ids: k.split(','), sec: 0, pf: 0, pa: 0 };
+  Object.entries(g.lineSecs || {}).forEach(([k, s]) => { if (k) get(k).sec += s; });
+  for (const e of g.events) {
+    const k = lkey(e.on || []); if (!k) continue;
+    if (e.k === 'opp') get(k).pa += e.pts;
+    else if (SHOTS.includes(e.k) && e.k[1] === 'm') get(k).pf += +e.k[0];
+  }
+  return Object.values(L).filter(l => l.sec >= 1 || l.pf || l.pa)
+    .map(l => ({ ...l, pm: l.pf - l.pa, players: l.ids.map(player).filter(Boolean).sort(byNum) }))
+    .sort((a, b) => b.sec - a.sec || b.pm - a.pm);
+}
+function renderLineups() {
+  const L = lineups();
+  if (!L.length) { $('#lineTable').innerHTML = '<div class="muted small">Δεν υπάρχουν ακόμα δεδομένα. Βάλε πεντάδα με «Αλλαγές» και ξεκίνα το ρολόι.</div>'; return; }
+  const best = Math.max(...L.filter(l => l.sec >= 60).map(l => l.pm), -Infinity);
+  $('#lineTable').innerHTML = `<table><tr><th class="l">Σχήμα</th><th>Λεπτά</th><th>Υπέρ</th><th>Κατά</th><th>+/-</th></tr>` +
+    L.map(l => `<tr><td class="l"><span class="lnum">${l.players.map(p => '#' + esc(p.num)).join(' ')}</span>${l.players.length !== 5 ? ` <span class="muted small">(${l.players.length} παίκτες)</span>` : ''}
+      <span class="lnm">${l.players.map(p => esc(p.last)).join(' · ')}</span></td>
+      <td>${fmtMin(l.sec)}</td><td>${l.pf}</td><td>${l.pa}</td>
+      <td style="font-weight:800;color:${l.pm > 0 ? 'var(--good)' : l.pm < 0 ? '#ff8d90' : 'inherit'}">${signed(l.pm)}${l.pm === best && l.pm > 0 ? ' ⭐' : ''}</td></tr>`).join('') + '</table>';
+}
+function lineAoa() {
+  return [['Αριθμοί', 'Παίκτες', 'Λεπτά', 'Πόντοι υπέρ', 'Πόντοι κατά', '+/-'],
+    ...lineups().map(l => [l.players.map(p => '#' + p.num).join(' '), l.players.map(p => `${p.last} ${p.first}`).join(', '),
+      Math.round(l.sec / 6) / 10, l.pf, l.pa, l.pm])];
+}
+
+/* ---------- player view ---------- */
+let pvId = null, pvTransp = true;
+const FORMATS = {
+  card:  { l: 'Καρτέλα',     d: '1600×900',  w: 1600, h: 900 },
+  story: { l: 'Insta Story', d: '1080×1920', w: 1080, h: 1920 },
+  post:  { l: 'Insta Post',  d: '1080×1350', w: 1080, h: 1350 },
+};
+document.addEventListener('click', e => {
+  const r = e.target.closest('tr.prow[data-pid]'); if (r) openPlayer(r.dataset.pid);
+});
+function openPlayer(id) { if (!player(id)) return; pvId = id; renderPV(); $('#pview').classList.remove('hidden'); $('#pview').scrollTop = 0; document.body.style.overflow = 'hidden'; }
+function closePlayer() { pvId = null; $('#pview').classList.add('hidden'); document.body.style.overflow = ''; }
+$('#pview').addEventListener('click', e => { if (e.target.id === 'pview' || e.target.closest('#pvClose')) closePlayer(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && pvId && $('#modal').classList.contains('hidden')) closePlayer(); });
+
+function playerData(id) {
+  const { st, us, them } = stats(), g = S.game, s = st[id];
+  const final = g.per >= g.nPer && g.secLeft <= 0 && !g.running && us !== them;
+  return { p: player(id), s, a: adv(s), sec: g.secs[id] || 0, us, them, g, res: final ? (us > them ? 'ΝΙΚΗ' : 'ΗΤΤΑ') : null };
+}
+function renderPV() {
+  const d = playerData(pvId), { p, s, a, sec } = d;
+  const tile = (v, l) => `<div class="pt"><b>${v}</b><span>${l}</span></div>`;
+  const it = (l, v, sub) => `<div><span>${l}</span><b>${v}${sub ? `<em>${sub}</em>` : ''}</b></div>`;
+  $('#pvBody').innerHTML = `
+    <div class="pvtop"><div class="pvnum">${esc(p.num) || '–'}</div>
+      <div><div class="pvname">${esc(p.first)} <b>${esc(p.last)}</b></div>
+      <div class="muted small">${esc(matchup(d.us, d.them))} · ${fmtDate(d.g.date)}${d.res ? ` · <b style="color:${d.res === 'ΝΙΚΗ' ? 'var(--good)' : '#ff8d90'}">${d.res}</b>` : ''}</div></div></div>
+    <div class="ptiles">${tile(s.pts, 'Πόντοι')}${tile(s.or + s.dr, 'Ριμπάουντ')}${tile(s.as, 'Ασίστ')}${tile(s.pir, 'PIR')}${tile(fmtMin(sec), 'Λεπτά')}${tile(signed(s.pm), '+/-')}</div>
+    <div class="pgrid">
+      ${it('Δίποντα', `${s['2m']}/${s['2a']}`, pctTxt(s['2m'], s['2a']))}${it('Τρίποντα', `${s['3m']}/${s['3a']}`, pctTxt(s['3m'], s['3a']))}${it('Βολές', `${s['1m']}/${s['1a']}`, pctTxt(s['1m'], s['1a']))}
+      ${it('Εντός πεδιάς', `${a.fgm}/${a.fga}`, pctF(a.fg))}${it('eFG%', pctF(a.efg))}${it('TS%', pctF(a.ts))}
+      ${it('Επιθ. ριμπάουντ', s.or)}${it('Αμυντ. ριμπάουντ', s.dr)}${it('Ασίστ/Λάθη', atF(s))}
+      ${it('Κλεψίματα', s.st)}${it('Κοψίματα', s.bl)}${it('Λάθη', s.to)}
+      ${it('Φάουλ', s.pf)}${it('Κερδ. φάουλ', s.fd)}${it('Κοψ. δέχτηκε', s.ba)}
+    </div>
+    <h3>📸 Εικόνες για κοινοποίηση</h3>
+    <label class="chk"><input type="checkbox" id="pvTr" ${pvTransp ? 'checked' : ''}> Διάφανο κενό για τη φωτογραφία του παίκτη</label>
+    <p class="muted small" style="margin:6px 0 0">Με το διάφανο κενό, βάζεις τη φωτογραφία του παίκτη σε ένα στρώμα <b>πίσω</b> από την εικόνα (π.χ. στο Canva ή σε άλλη εφαρμογή επεξεργασίας) και φαίνεται μέσα από το κενό. Το καρό μοτίβο στην προεπισκόπηση δείχνει το διάφανο σημείο.</p>
+    <div class="pimgs">${Object.entries(FORMATS).map(([k, f]) => `
+      <div class="pimg"><div class="pthumb ${k}"><img data-f="${k}" alt="${f.l}"></div>
+        <div class="row" style="justify-content:space-between;gap:6px"><div><b>${f.l}</b><div class="muted small">${f.d} · PNG</div></div>
+        <button class="btn primary" data-dl="${k}">⬇ Λήψη</button></div></div>`).join('')}</div>`;
+  $('#pvTr').onchange = e => { pvTransp = e.target.checked; drawThumbs(); };
+  drawThumbs();
+}
+function drawThumbs() {
+  const go = () => document.querySelectorAll('#pvBody img[data-f]').forEach(img => { img.src = drawPlayer(pvId, img.dataset.f, pvTransp).toDataURL('image/png'); });
+  if (LOGO.complete) go(); else LOGO.onload = go;
+}
+$('#pvBody').addEventListener('click', async e => {
+  const b = e.target.closest('[data-dl]'); if (!b) return;
+  const k = b.dataset.dl, p = player(pvId);
+  await savePng(drawPlayer(pvId, k, pvTransp), `HMTY_${safeName(p.num)}_${safeName(p.last)}_${k}.png`);
+});
+const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+async function savePng(cv, name) {
+  const blob = dataUrlToBlob(cv.toDataURL('image/png'));
+  // iPhone/iPad: the share sheet offers "Save Image" straight into Photos
+  if (!DL && IOS && navigator.canShare) {
+    try { const f = new File([blob], name, { type: 'image/png' }); if (navigator.canShare({ files: [f] })) { await navigator.share({ files: [f] }); return; } }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  if (DL || STANDALONE) { const ok = await saveFile(name, blob, 'image/png'); if (ok && !DL) toast('✓ Κατέβηκε: ' + name); return; }
+  toast('Η λήψη δεν είναι διαθέσιμη εδώ');
+}
+
+/* ---------- player images (card / story / post) ---------- */
+const up = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+function drawPlayer(id, fmt, transparent) {
+  const d = playerData(id), { p, s, a, sec, g } = d, f = FORMATS[fmt], W = f.w, H = f.h;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  const F = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif';
+  const COL = { text: '#ffffff', soft: '#f0d4f4', lav: '#e6b8ee', muted: '#b9a3bf', good: '#6fe0a3', bad: '#ff8d90', logo: '#570359', accB: '#a13fa7' };
+  const setLS = v => { if ('letterSpacing' in c) c.letterSpacing = v + 'px'; };
+  // draws text, shrinking the font until it fits maxW; returns drawn width
+  const T = (t, x, y, { w = 700, px = 30, color = COL.text, align = 'left', ls = 0, maxW = 0, shadow = false } = {}) => {
+    t = String(t); let size = px; setLS(ls);
+    do { c.font = `${w} ${size}px ${F}`; if (!maxW || c.measureText(t).width <= maxW) break; size -= 1; } while (size > 8);
+    c.fillStyle = color; c.textAlign = align; c.textBaseline = 'alphabetic';
+    if (shadow) { c.shadowColor = 'rgba(0,0,0,.6)'; c.shadowBlur = px * 0.35; c.shadowOffsetY = 2; }
+    c.fillText(t, x, y); const mw = c.measureText(t).width;
+    c.shadowColor = 'transparent'; c.shadowBlur = 0; c.shadowOffsetY = 0; setLS(0); return mw;
+  };
+  const RR = (x, y, w, h, r) => { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); };
+
+  // background
+  const bg = c.createLinearGradient(0, 0, W * 0.4, H);
+  bg.addColorStop(0, '#3d0a44'); bg.addColorStop(0.5, '#1d0a23'); bg.addColorStop(1, '#0b050d');
+  c.fillStyle = bg; c.fillRect(0, 0, W, H);
+  c.save(); c.globalAlpha = 0.06; c.fillStyle = COL.lav;
+  for (let i = 0; i < 4; i++) { const x0 = W * (0.5 + i * 0.13), bw = W * 0.05; c.beginPath(); c.moveTo(x0, H); c.lineTo(x0 + bw, H); c.lineTo(x0 + bw + H * 0.6, 0); c.lineTo(x0 + H * 0.6, 0); c.fill(); }
+  c.restore();
+  // big faint jersey number
+  const wmark = (x, y, px) => { c.save(); c.globalAlpha = 0.05; T(p.num || '', x, y, { w: 900, px, align: 'right', color: '#fff' }); c.restore(); };
+
+  // photo area: transparent window (or a placeholder) with a soft edge
+  const silhouette = (cx, cy, r) => {
+    c.save(); c.fillStyle = 'rgba(255,255,255,.07)';
+    c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.ellipse(cx, cy + r * 2.6, r * 2.1, r * 1.5, 0, Math.PI, 0); c.fill(); c.restore();
+    T('ΦΩΤΟΓΡΑΦΙΑ ΠΑΙΚΤΗ', cx, cy + r * 2.9, { w: 800, px: Math.round(r * 0.22), color: 'rgba(255,255,255,.18)', align: 'center', ls: 4 });
+  };
+  const photoFade = (yEnd, fade) => {
+    if (transparent) {
+      c.save(); c.globalCompositeOperation = 'destination-out';
+      c.fillStyle = '#000'; c.fillRect(0, 0, W, yEnd - fade);
+      const gr = c.createLinearGradient(0, yEnd - fade, 0, yEnd);
+      [[0, 1], [.25, .9], [.5, .6], [.75, .25], [.9, .07], [1, 0]].forEach(([o, al]) => gr.addColorStop(o, `rgba(0,0,0,${al})`));
+      c.fillStyle = gr; c.fillRect(0, yEnd - fade, W, fade); c.restore();
+    } else {
+      const gr = c.createLinearGradient(0, 0, 0, yEnd); gr.addColorStop(0, '#2e1436'); gr.addColorStop((yEnd - fade) / yEnd, '#24102a'); gr.addColorStop(1, 'rgba(29,10,35,0)');
+      c.fillStyle = gr; c.fillRect(0, 0, W, yEnd); silhouette(W / 2, (yEnd - fade) * 0.42, W * 0.13);
+    }
+  };
+  const photoBox = (x, y, w, h, r) => {
+    if (transparent) { c.save(); c.globalCompositeOperation = 'destination-out'; RR(x, y, w, h, r); c.fillStyle = '#000'; c.fill(); c.restore(); }
+    else { c.save(); RR(x, y, w, h, r); c.clip(); const gr = c.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, '#2e1436'); gr.addColorStop(1, '#1b0b21');
+      c.fillStyle = gr; c.fillRect(x, y, w, h); c.restore(); silhouette(x + w / 2, y + h * 0.36, w * 0.16); }
+    const bd = c.createLinearGradient(x, y, x + w, y + h); bd.addColorStop(0, COL.accB); bd.addColorStop(1, 'rgba(230,184,238,.35)');
+    c.lineWidth = 5; c.strokeStyle = bd; RR(x, y, w, h, r); c.stroke();
+  };
+  const logo = (x, y, size) => { if (LOGO.complete && LOGO.naturalWidth) { c.save(); c.shadowColor = 'rgba(0,0,0,.5)'; c.shadowBlur = size * 0.12; c.drawImage(LOGO, x, y, size, size); c.restore(); } };
+  // score pill: "date · home/away" + matchup with score
+  const pill = (xRight, y, maxW, scale) => {
+    const l1 = `${fmtDate(g.date)} · ${g.home ? 'ΕΝΤΟΣ' : 'ΕΚΤΟΣ'}${d.res ? ' · ' + d.res : ''}`, l2 = up(matchup(d.us, d.them));
+    c.font = `800 ${30 * scale}px ${F}`; const w2 = Math.min(c.measureText(l2).width, maxW - 48 * scale);
+    c.font = `700 ${20 * scale}px ${F}`; const w1 = c.measureText(l1).width; const w = Math.max(w1, w2) + 48 * scale, h = 96 * scale;
+    RR(xRight - w, y, w, h, 18 * scale); c.fillStyle = 'rgba(12,5,14,.78)'; c.fill();
+    c.lineWidth = 2; c.strokeStyle = 'rgba(230,184,238,.25)'; c.stroke();
+    T(l1, xRight - w + 24 * scale, y + 36 * scale, { w: 700, px: 20 * scale, color: d.res === 'ΝΙΚΗ' ? COL.good : d.res === 'ΗΤΤΑ' ? COL.bad : COL.lav, ls: 2 * scale });
+    T(l2, xRight - w + 24 * scale, y + 76 * scale, { w: 800, px: 30 * scale, maxW: w - 48 * scale });
+  };
+  // number + first/last name block
+  const nameBlock = (x, base, scale, maxW) => {
+    const nw = p.num !== '' ? T('#' + p.num, x, base, { w: 900, px: 140 * scale, color: COL.lav, shadow: true }) + 26 * scale : 0;
+    T(up(p.first), x + nw, base - 92 * scale, { w: 600, px: 42 * scale, color: COL.soft, ls: 6 * scale, maxW: maxW - nw, shadow: true });
+    T(up(p.last), x + nw, base - 4 * scale, { w: 900, px: 92 * scale, maxW: maxW - nw, shadow: true });
+  };
+  const tiles = (items, x, y, w, h, gap, scale) => {
+    const tw = (w - gap * (items.length - 1)) / items.length;
+    items.forEach(([v, l], i) => {
+      const tx = x + i * (tw + gap);
+      RR(tx, y, tw, h, 20 * scale); const gr = c.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, 'rgba(161,63,167,.38)'); gr.addColorStop(1, 'rgba(87,3,89,.30)');
+      c.fillStyle = gr; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(230,184,238,.30)'; c.stroke();
+      T(v, tx + tw / 2, y + h * 0.60, { w: 900, px: 90 * scale, align: 'center', maxW: tw - 16 });
+      T(l, tx + tw / 2, y + h * 0.86, { w: 800, px: 21 * scale, color: COL.lav, align: 'center', ls: 3 * scale, maxW: tw - 16 });
+    });
+  };
+  const mini = (items, x, y, w, h, scale) => {
+    RR(x, y, w, h, 16 * scale); c.fillStyle = 'rgba(255,255,255,.05)'; c.fill(); c.lineWidth = 1.5; c.strokeStyle = 'rgba(230,184,238,.16)'; c.stroke();
+    const iw = w / items.length;
+    items.forEach(([l, v, sub], i) => {
+      const ix = x + i * iw;
+      if (i) { c.fillStyle = 'rgba(230,184,238,.16)'; c.fillRect(ix, y + h * 0.2, 1.5, h * 0.6); }
+      T(l, ix + iw / 2, y + h * 0.34, { w: 800, px: 18 * scale, color: COL.muted, align: 'center', ls: 2 * scale, maxW: iw - 10 });
+      T(v, ix + iw / 2, y + h * (sub ? 0.70 : 0.78), { w: 800, px: 40 * scale, align: 'center', maxW: iw - 10 });
+      if (sub) T(sub, ix + iw / 2, y + h * 0.92, { w: 700, px: 17 * scale, color: COL.lav, align: 'center', maxW: iw - 10 });
+    });
+  };
+  const sh = (m, at) => [`${m}/${at}`, at ? Math.round(m / at * 100) + '%' : '–'];
+  const MAIN = [[s.pts, 'ΠΟΝΤΟΙ'], [s.or + s.dr, 'ΡΙΜΠΑΟΥΝΤ'], [s.as, 'ΑΣΙΣΤ'], [s.pir, 'PIR']];
+  const SHOOT = [['2Π', ...sh(s['2m'], s['2a'])], ['3Π', ...sh(s['3m'], s['3a'])], ['ΒΟΛΕΣ', ...sh(s['1m'], s['1a'])]];
+  const MIN = ['ΛΕΠΤΑ', fmtMin(sec)], PM = ['+/-', signed(s.pm)];
+  const brand = (x, y, scale, align = 'left') => T('HMTY BC · ΣΤΑΤΙΣΤΙΚΑ ΑΓΩΝΑ', x, y, { w: 800, px: 22 * scale, color: COL.lav, ls: 4 * scale, align });
+
+  if (fmt === 'post') {
+    wmark(W - 30, H + 70, 600);
+    photoFade(860, 320);
+    logo(44, 44, 128); pill(W - 44, 60, W - 220, 1);
+    nameBlock(56, 930, 1, W - 112);
+    tiles(MAIN, 48, 970, W - 96, 180, 16, 1);
+    mini([...SHOOT, MIN, PM], 48, 1170, W - 96, 120, 1);
+    brand(48, 1322, 0.9);
+    T(`eFG% ${pctF(a.efg)} · TS% ${pctF(a.ts)}`, W - 48, 1322, { w: 700, px: 20, color: COL.muted, align: 'right' });
+  } else if (fmt === 'story') {
+    wmark(W - 30, H - 120, 680);
+    photoFade(1160, 420);
+    logo(56, 230, 150); pill(W - 56, 250, W - 260, 1.05);
+    nameBlock(60, 1220, 1.1, W - 120);
+    tiles(MAIN, 52, 1260, W - 104, 196, 16, 1.08);
+    mini([...SHOOT, ['FG%', pctF(a.fg).replace('.0%', '%')]], 52, 1476, W - 104, 124, 1.05);
+    mini([MIN, ['ΚΛΕΨ.', s.st], ['ΚΟΨ.', s.bl], PM, ['TS%', pctF(a.ts).replace('.0%', '%')]], 52, 1614, W - 104, 112, 1.05);
+    brand(W / 2, 1770, 0.95, 'center');
+  } else { // card 1600×900
+    const X = 660, RW = W - X - 44;
+    wmark(W - 20, H + 90, 620);
+    photoBox(40, 40, 580, H - 80, 30);
+    logo(W - 44 - 112, 40, 112);
+    brand(X, 84, 1);
+    const nw = p.num !== '' ? T('#' + p.num, X, 236, { w: 900, px: 128, color: COL.lav }) + 24 : 0;
+    T(up(p.first), X + nw, 150, { w: 600, px: 38, color: COL.soft, ls: 6, maxW: RW - nw - 130 });
+    T(up(p.last), X + nw, 232, { w: 900, px: 84, maxW: RW - nw - 10 });
+    const res = d.res ? ` · ${d.res}` : '';
+    T(`${up(matchup(d.us, d.them))}`, X, 290, { w: 800, px: 28, maxW: RW - 220 });
+    T(`${fmtDate(g.date)} · ${g.home ? 'ΕΝΤΟΣ' : 'ΕΚΤΟΣ'}${res}`, W - 44, 290, { w: 700, px: 20, color: d.res === 'ΝΙΚΗ' ? COL.good : d.res === 'ΗΤΤΑ' ? COL.bad : COL.lav, align: 'right', ls: 2 });
+    tiles(MAIN, X, 318, RW, 168, 14, 0.92);
+    mini([...SHOOT, ['FG%', pctF(a.fg).replace('.0%', '%')], MIN], X, 504, RW, 112, 0.95);
+    mini([['ΕΠ. ΡΙΜΠ.', s.or], ['ΑΜ. ΡΙΜΠ.', s.dr], ['ΚΛΕΨ.', s.st], ['ΚΟΨ.', s.bl], PM], X, 630, RW, 104, 0.95);
+    mini([['eFG%', pctF(a.efg).replace('.0%', '%')], ['TS%', pctF(a.ts).replace('.0%', '%')], ['ΑΣ/ΛΑΘ', atF(s)], ['ΛΑΘΗ', s.to], ['ΦΑΟΥΛ', s.pf]], X, 748, RW, 104, 0.95);
+  }
+  return cv;
+}
 
 /* ---------- views ---------- */
 function setView(v) {
