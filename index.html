@@ -126,6 +126,16 @@ td .lnum{font-weight:800;color:var(--accent2)} td .lnm{display:block;font-size:1
 .pgrid div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding:7px 0;font-size:14px}
 .pgrid div span{color:var(--muted)}.pgrid div em{font-style:normal;color:var(--muted);font-size:12px;margin-left:6px}
 .pv h3{font-size:15px;margin:20px 0 8px}
+.optlbl{font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.6px;margin:4px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);
+  font-size:13px;font-weight:600;cursor:pointer;user-select:none;-webkit-user-select:none;color:var(--muted);transition:background .15s,color .15s}
+.chip input{display:none}
+.chip.on{background:linear-gradient(120deg,var(--accent-b),var(--logo));border-color:var(--accent-b);color:#fff}
+.chip.on::before{content:"✓";margin-right:5px;font-weight:800}
+.chip.mvp.on{background:linear-gradient(120deg,#ffe08a,#f6b93b);border-color:#f6b93b;color:#3a0a3d}
+.mvptag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:linear-gradient(#ffe08a,#f6b93b);color:#3a0a3d;font-size:11px;font-weight:800;vertical-align:1px}
+.btn.mini{padding:5px 12px;font-size:13px}
 .chk{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
 .chk input{width:18px;height:18px;accent-color:var(--accent-b)}
 .pimgs{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
@@ -727,7 +737,7 @@ function renderBox() {
     sh(s['1m'], s['1a']), pctTxt(s['1m'], s['1a']), s.or, s.dr, s.or + s.dr, s.as, s.st, s.bl, s.fd, s.to, s.pf, s.ba,
     pm == null ? '' : signed(pm), `<b>${s.pir}</b>`];
   $('#boxTable').innerHTML = `<table><tr>${BOX_HDR.map((h, i) => `<th class="${i === 1 ? 'l' : ''}">${h}</th>`).join('')}</tr>` +
-    rows.map(r => tr(line(esc(r.p.num), esc(r.p.last + ' ' + r.p.first), r.sec, r.s, r.s.pm), 'prow', r.p.id)).join('') +
+    rows.map(r => tr(line(esc(r.p.num), esc(r.p.last + ' ' + r.p.first) + (S.game.mvp === r.p.id ? ' <span class="mvptag">⭐ MVP</span>' : ''), r.sec, r.s, r.s.pm), 'prow', r.p.id)).join('') +
     tr(line('', 'ΣΥΝΟΛΟ', null, tot, null), 'tot') + '</table>';
   renderAdv(); renderLineups();
 }
@@ -930,7 +940,17 @@ document.addEventListener('click', e => {
   const r = e.target.closest('tr.prow[data-pid]'); if (r) openPlayer(r.dataset.pid);
 });
 function openPlayer(id) { if (!player(id)) return; pvId = id; renderPV(); $('#pview').classList.remove('hidden'); $('#pview').scrollTop = 0; document.body.style.overflow = 'hidden'; }
-function closePlayer() { pvId = null; $('#pview').classList.add('hidden'); document.body.style.overflow = ''; }
+function closePlayer() { pvId = null; $('#pview').classList.add('hidden'); document.body.style.overflow = ''; renderAll(); }
+// player with the highest PIR in the team (suggested MVP)
+function topPir() { const { st } = stats(); let best = null; S.roster.forEach(p => { if (!best || st[p.id].pir > st[best].pir) best = p.id; }); return best; }
+function mvpHintHtml() {
+  const g = S.game, cur = player(g.mvp), top = player(topPir());
+  if (g.mvp && g.mvp === pvId) return '⭐ Είναι ο MVP του αγώνα. Το σήμα MVP μπαίνει στις εικόνες του.';
+  let t = cur ? `MVP τώρα: <b>${esc(pName(cur))}</b>. Αν το επιλέξεις εδώ, μεταφέρεται σε αυτόν τον παίκτη.` : 'Δεν έχει οριστεί MVP για αυτόν τον αγώνα.';
+  if (top && top.id === pvId) t += ' Αυτός ο παίκτης έχει το υψηλότερο PIR της ομάδας.';
+  else if (top && !cur) t += ` Υψηλότερο PIR: <b>${esc(pName(top))}</b>.`;
+  return t;
+}
 $('#pview').addEventListener('click', e => { if (e.target.id === 'pview' || e.target.closest('#pvClose')) closePlayer(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && pvId && $('#modal').classList.contains('hidden')) closePlayer(); });
 
@@ -956,7 +976,20 @@ function renderPV() {
       ${it('Φάουλ', s.pf)}${it('Κερδ. φάουλ', s.fd)}${it('Κοψ. δέχτηκε', s.ba)}
     </div>
     <h3>📸 Εικόνες για κοινοποίηση</h3>
-    <label class="chk"><input type="checkbox" id="pvTr" ${pvTransp ? 'checked' : ''}> Διάφανο κενό για τη φωτογραφία του παίκτη</label>
+    <div class="optlbl">Τι θα δείχνουν οι εικόνες</div>
+    <div class="chips" id="imgStats">${IMG_STATS.map(x => `<label class="chip ${imgOpts().stats.includes(x.k) ? 'on' : ''}"><input type="checkbox" data-st="${x.k}" ${imgOpts().stats.includes(x.k) ? 'checked' : ''}>${x.t}</label>`).join('')}</div>
+    <div class="row" style="gap:6px;margin:8px 0 4px">
+      <button class="btn mini" data-preset="basic">Βασικά</button><button class="btn mini" data-preset="all">Όλα</button><button class="btn mini" data-preset="none">Κανένα</button>
+    </div>
+    <p class="muted small" style="margin:4px 0 12px">Τα 4 πρώτα επιλεγμένα (με τη σειρά της λίστας) μπαίνουν στα μεγάλα κουτιά, τα υπόλοιπα από κάτω. Όσο περισσότερα διαλέγεις, τόσο μικραίνει το κενό για τη φωτογραφία.</p>
+    <div class="optlbl">Επιπλέον</div>
+    <div class="chips">
+      <label class="chip mvp ${S.game.mvp === pvId ? 'on' : ''}"><input type="checkbox" data-mvp ${S.game.mvp === pvId ? 'checked' : ''}>⭐ MVP αγώνα</label>
+      <label class="chip ${imgOpts().logo ? 'on' : ''}"><input type="checkbox" data-opt="logo" ${imgOpts().logo ? 'checked' : ''}>Λογότυπο</label>
+      <label class="chip ${imgOpts().score ? 'on' : ''}"><input type="checkbox" data-opt="score" ${imgOpts().score ? 'checked' : ''}>Σκορ & ημερομηνία</label>
+      <label class="chip ${pvTransp ? 'on' : ''}"><input type="checkbox" id="pvTr" ${pvTransp ? 'checked' : ''}>Διάφανο κενό για φωτογραφία</label>
+    </div>
+    <p class="muted small" id="mvpHint" style="margin:8px 0 0">${mvpHintHtml()}</p>
     <p class="muted small" style="margin:6px 0 0">Με το διάφανο κενό, βάζεις τη φωτογραφία του παίκτη σε ένα στρώμα <b>πίσω</b> από την εικόνα (π.χ. στο Canva ή σε άλλη εφαρμογή επεξεργασίας) και φαίνεται μέσα από το κενό. Το καρό μοτίβο στην προεπισκόπηση δείχνει το διάφανο σημείο.</p>
     <div class="pimgs">${Object.entries(FORMATS).map(([k, f]) => `
       <div class="pimg"><div class="pthumb ${k}"><img data-f="${k}" alt="${f.l}"></div>
@@ -965,6 +998,26 @@ function renderPV() {
   $('#pvTr').onchange = e => { pvTransp = e.target.checked; drawThumbs(); };
   drawThumbs();
 }
+let thumbT = null;
+const redrawSoon = () => { clearTimeout(thumbT); thumbT = setTimeout(drawThumbs, 120); };
+$('#pvBody').addEventListener('change', e => {
+  const i = e.target; if (i.type !== 'checkbox') return;
+  i.closest('.chip')?.classList.toggle('on', i.checked);
+  const o = imgOpts();
+  if (i.dataset.st) { o.stats = IMG_STATS.map(x => x.k).filter(k => k === i.dataset.st ? i.checked : o.stats.includes(k)); }
+  else if (i.dataset.opt) o[i.dataset.opt] = i.checked;
+  else if ('mvp' in i.dataset) { S.game.mvp = i.checked ? pvId : null; $('#mvpHint').innerHTML = mvpHintHtml(); }
+  else return; // the transparency box has its own handler
+  save(); redrawSoon();
+});
+$('#pvBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-preset]'); if (!b) return;
+  const o = imgOpts(), pr = b.dataset.preset;
+  o.stats = pr === 'all' ? IMG_STATS.map(x => x.k) : pr === 'none' ? [] : [...IMG_DEFAULT];
+  save();
+  document.querySelectorAll('#imgStats input').forEach(i => { i.checked = o.stats.includes(i.dataset.st); i.closest('.chip').classList.toggle('on', i.checked); });
+  redrawSoon();
+});
 function drawThumbs() {
   const go = () => document.querySelectorAll('#pvBody img[data-f]').forEach(img => { img.src = drawPlayer(pvId, img.dataset.f, pvTransp).toDataURL('image/png'); });
   if (LOGO.complete) go(); else LOGO.onload = go;
@@ -1059,20 +1112,34 @@ function drawPlayer(id, fmt, transparent) {
     T(up(p.first), x + nw, base - 92 * scale, { w: 600, px: 42 * scale, color: COL.soft, ls: 6 * scale, maxW: maxW - nw, shadow: true });
     T(up(p.last), x + nw, base - 4 * scale, { w: 900, px: 92 * scale, maxW: maxW - nw, shadow: true });
   };
+  const star = (cx, cy, R, col) => { c.beginPath(); for (let i = 0; i < 10; i++) { const an = -Math.PI / 2 + i * Math.PI / 5, rad = i % 2 ? R * 0.45 : R; c.lineTo(cx + rad * Math.cos(an), cy + rad * Math.sin(an)); } c.closePath(); c.fillStyle = col; c.fill(); };
+  // gold "★ MVP" badge
+  const mvpBadge = (x, y, scale) => {
+    const hh = 64 * scale, st = 34 * scale, pad = 22 * scale, gapS = 12 * scale;
+    c.font = `900 ${36 * scale}px ${F}`; setLS(4 * scale); const tw = c.measureText('MVP').width; setLS(0);
+    const w = pad * 2 + st + gapS + tw;
+    c.save(); c.shadowColor = 'rgba(0,0,0,.45)'; c.shadowBlur = 16 * scale; c.shadowOffsetY = 4 * scale;
+    RR(x, y, w, hh, hh / 2); const gr = c.createLinearGradient(x, y, x, y + hh); gr.addColorStop(0, '#ffe08a'); gr.addColorStop(.55, '#f6b93b'); gr.addColorStop(1, '#d98e04');
+    c.fillStyle = gr; c.fill(); c.restore();
+    c.lineWidth = 2 * scale; c.strokeStyle = 'rgba(255,255,255,.65)'; RR(x + 1, y + 1, w - 2, hh - 2, hh / 2); c.stroke();
+    star(x + pad + st / 2, y + hh / 2, st / 2, '#3a0a3d');
+    T('MVP', x + pad + st + gapS, y + hh / 2 + 13 * scale, { w: 900, px: 36 * scale, color: '#3a0a3d', ls: 4 * scale });
+  };
+  const isMvp = S.game.mvp === id;
   const tiles = (items, x, y, w, h, gap, scale) => {
     const tw = (w - gap * (items.length - 1)) / items.length;
-    items.forEach(([v, l], i) => {
+    items.forEach(([v, l, sub], i) => {
       const tx = x + i * (tw + gap);
       RR(tx, y, tw, h, 20 * scale); const gr = c.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, 'rgba(161,63,167,.38)'); gr.addColorStop(1, 'rgba(87,3,89,.30)');
       c.fillStyle = gr; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(230,184,238,.30)'; c.stroke();
-      T(v, tx + tw / 2, y + h * 0.60, { w: 900, px: 90 * scale, align: 'center', maxW: tw - 16 });
-      T(l, tx + tw / 2, y + h * 0.86, { w: 800, px: 21 * scale, color: COL.lav, align: 'center', ls: 3 * scale, maxW: tw - 16 });
+      T(v, tx + tw / 2, y + h * 0.60, { w: 900, px: 90 * scale, align: 'center', maxW: tw - 20 });
+      T(sub ? `${l} · ${sub}` : l, tx + tw / 2, y + h * 0.86, { w: 800, px: 21 * scale, color: COL.lav, align: 'center', ls: 3 * scale, maxW: tw - 16 });
     });
   };
   const mini = (items, x, y, w, h, scale) => {
     RR(x, y, w, h, 16 * scale); c.fillStyle = 'rgba(255,255,255,.05)'; c.fill(); c.lineWidth = 1.5; c.strokeStyle = 'rgba(230,184,238,.16)'; c.stroke();
     const iw = w / items.length;
-    items.forEach(([l, v, sub], i) => {
+    items.forEach(([v, l, sub], i) => {
       const ix = x + i * iw;
       if (i) { c.fillStyle = 'rgba(230,184,238,.16)'; c.fillRect(ix, y + h * 0.2, 1.5, h * 0.6); }
       T(l, ix + iw / 2, y + h * 0.34, { w: 800, px: 18 * scale, color: COL.muted, align: 'center', ls: 2 * scale, maxW: iw - 10 });
@@ -1080,48 +1147,96 @@ function drawPlayer(id, fmt, transparent) {
       if (sub) T(sub, ix + iw / 2, y + h * 0.92, { w: 700, px: 17 * scale, color: COL.lav, align: 'center', maxW: iw - 10 });
     });
   };
-  const sh = (m, at) => [`${m}/${at}`, at ? Math.round(m / at * 100) + '%' : '–'];
-  const MAIN = [[s.pts, 'ΠΟΝΤΟΙ'], [s.or + s.dr, 'ΡΙΜΠΑΟΥΝΤ'], [s.as, 'ΑΣΙΣΤ'], [s.pir, 'PIR']];
-  const SHOOT = [['2Π', ...sh(s['2m'], s['2a'])], ['3Π', ...sh(s['3m'], s['3a'])], ['ΒΟΛΕΣ', ...sh(s['1m'], s['1a'])]];
-  const MIN = ['ΛΕΠΤΑ', fmtMin(sec)], PM = ['+/-', signed(s.pm)];
+  // The selected stats: first 4 → big tiles, the rest → rows of up to 5. Shrinks to fit maxH.
+  const items = imgItems(d), opt = imgOpts();
+  const statsBlock = (x, w, base, maxH) => {
+    const big = items.slice(0, 4), rest = items.slice(4);
+    const rows = Math.ceil(rest.length / 5), per = rows ? Math.ceil(rest.length / rows) : 0;
+    const blocks = (big.length ? 1 : 0) + rows;
+    let th = big.length ? base.tileH : 0, mh = base.miniH, g = base.gap;
+    const full = th + rows * mh + Math.max(0, blocks - 1) * g;
+    const k = maxH && full > maxH ? maxH / full : 1;
+    th *= k; mh *= k; g *= k;
+    return { h: full * k, draw: y => {
+      if (big.length) { tiles(big.map(i => [i.v, i.l, i.sub]), x, y, w, th, 16, base.scale * k); y += th + g; }
+      for (let r = 0; r < rows; r++) { mini(rest.slice(r * per, (r + 1) * per).map(i => [i.v, i.l, i.sub]), x, y, w, mh, base.scale * Math.max(k, .8)); y += mh + g; }
+    } };
+  };
   const brand = (x, y, scale, align = 'left') => T('HMTY BC · ΣΤΑΤΙΣΤΙΚΑ ΑΓΩΝΑ', x, y, { w: 800, px: 22 * scale, color: COL.lav, ls: 4 * scale, align });
 
   if (fmt === 'post') {
+    const B = statsBlock(48, W - 96, { tileH: 180, miniH: 120, gap: 16, scale: 1 }, 700);
+    const top = 1292 - B.h, nameBase = (items.length ? top : 1292) - 40;
     wmark(W - 30, H + 70, 600);
-    photoFade(860, 320);
-    logo(44, 44, 128); pill(W - 44, 60, W - 220, 1);
-    nameBlock(56, 930, 1, W - 112);
-    tiles(MAIN, 48, 970, W - 96, 180, 16, 1);
-    mini([...SHOOT, MIN, PM], 48, 1170, W - 96, 120, 1);
-    brand(48, 1322, 0.9);
-    T(`eFG% ${pctF(a.efg)} · TS% ${pctF(a.ts)}`, W - 48, 1322, { w: 700, px: 20, color: COL.muted, align: 'right' });
+    photoFade(Math.max(nameBase - 70, 260), Math.min(320, Math.max(nameBase - 70, 260) * 0.45));
+    if (opt.logo) logo(44, 44, 128);
+    if (opt.score) pill(W - 44, 60, W - (opt.logo ? 220 : 88), 1);
+    nameBlock(56, nameBase, 1, W - 112);
+    if (isMvp) mvpBadge(56, nameBase - 210, 1);
+    B.draw(top);
+    brand(48, 1326, 0.9);
   } else if (fmt === 'story') {
+    const B = statsBlock(52, W - 104, { tileH: 196, miniH: 120, gap: 16, scale: 1.08 }, 820);
+    const top = 1726 - B.h, nameBase = (items.length ? top : 1726) - 40;
     wmark(W - 30, H - 120, 680);
-    photoFade(1160, 420);
-    logo(56, 230, 150); pill(W - 56, 250, W - 260, 1.05);
-    nameBlock(60, 1220, 1.1, W - 120);
-    tiles(MAIN, 52, 1260, W - 104, 196, 16, 1.08);
-    mini([...SHOOT, ['FG%', pctF(a.fg).replace('.0%', '%')]], 52, 1476, W - 104, 124, 1.05);
-    mini([MIN, ['ΚΛΕΨ.', s.st], ['ΚΟΨ.', s.bl], PM, ['TS%', pctF(a.ts).replace('.0%', '%')]], 52, 1614, W - 104, 112, 1.05);
-    brand(W / 2, 1770, 0.95, 'center');
+    photoFade(Math.max(nameBase - 60, 520), Math.min(420, Math.max(nameBase - 60, 520) * 0.45));
+    if (opt.logo) logo(56, 230, 150);
+    if (opt.score) pill(W - 56, 250, W - (opt.logo ? 260 : 112), 1.05);
+    nameBlock(60, nameBase, 1.1, W - 120);
+    if (isMvp) mvpBadge(60, nameBase - 230, 1.1);
+    B.draw(top);
+    brand(W / 2, 1772, 0.95, 'center');
   } else { // card 1600×900
     const X = 660, RW = W - X - 44;
     wmark(W - 20, H + 90, 620);
     photoBox(40, 40, 580, H - 80, 30);
-    logo(W - 44 - 112, 40, 112);
+    if (isMvp) mvpBadge(66, 66, 1.05);
+    if (opt.logo) logo(W - 44 - 112, 40, 112);
     brand(X, 84, 1);
     const nw = p.num !== '' ? T('#' + p.num, X, 236, { w: 900, px: 128, color: COL.lav }) + 24 : 0;
-    T(up(p.first), X + nw, 150, { w: 600, px: 38, color: COL.soft, ls: 6, maxW: RW - nw - 130 });
+    T(up(p.first), X + nw, 150, { w: 600, px: 38, color: COL.soft, ls: 6, maxW: RW - nw - (opt.logo ? 130 : 10) });
     T(up(p.last), X + nw, 232, { w: 900, px: 84, maxW: RW - nw - 10 });
-    const res = d.res ? ` · ${d.res}` : '';
-    T(`${up(matchup(d.us, d.them))}`, X, 290, { w: 800, px: 28, maxW: RW - 220 });
-    T(`${fmtDate(g.date)} · ${g.home ? 'ΕΝΤΟΣ' : 'ΕΚΤΟΣ'}${res}`, W - 44, 290, { w: 700, px: 20, color: d.res === 'ΝΙΚΗ' ? COL.good : d.res === 'ΗΤΤΑ' ? COL.bad : COL.lav, align: 'right', ls: 2 });
-    tiles(MAIN, X, 318, RW, 168, 14, 0.92);
-    mini([...SHOOT, ['FG%', pctF(a.fg).replace('.0%', '%')], MIN], X, 504, RW, 112, 0.95);
-    mini([['ΕΠ. ΡΙΜΠ.', s.or], ['ΑΜ. ΡΙΜΠ.', s.dr], ['ΚΛΕΨ.', s.st], ['ΚΟΨ.', s.bl], PM], X, 630, RW, 104, 0.95);
-    mini([['eFG%', pctF(a.efg).replace('.0%', '%')], ['TS%', pctF(a.ts).replace('.0%', '%')], ['ΑΣ/ΛΑΘ', atF(s)], ['ΛΑΘΗ', s.to], ['ΦΑΟΥΛ', s.pf]], X, 748, RW, 104, 0.95);
+    let top = 270;
+    if (opt.score) {
+      const res = d.res ? ` · ${d.res}` : '';
+      T(`${up(matchup(d.us, d.them))}`, X, 290, { w: 800, px: 28, maxW: RW - 220 });
+      T(`${fmtDate(g.date)} · ${g.home ? 'ΕΝΤΟΣ' : 'ΕΚΤΟΣ'}${res}`, W - 44, 290, { w: 700, px: 20, color: d.res === 'ΝΙΚΗ' ? COL.good : d.res === 'ΗΤΤΑ' ? COL.bad : COL.lav, align: 'right', ls: 2 });
+      top = 318;
+    }
+    statsBlock(X, RW, { tileH: 168, miniH: 108, gap: 14, scale: 0.92 }, 852 - top).draw(top);
   }
   return cv;
+}
+
+/* which stats go on the images (chosen with checkboxes, remembered) */
+const IMG_STATS = [
+  { k: 'pts', t: 'Πόντοι' }, { k: 'reb', t: 'Ριμπάουντ' }, { k: 'as', t: 'Ασίστ' }, { k: 'pir', t: 'PIR' },
+  { k: '2p', t: 'Δίποντα' }, { k: '3p', t: 'Τρίποντα' }, { k: 'ft', t: 'Βολές' }, { k: 'fg', t: 'Εντός πεδιάς' },
+  { k: 'min', t: 'Λεπτά' }, { k: 'pm', t: '+/-' }, { k: 'or', t: 'Επιθ. ριμπ.' }, { k: 'dr', t: 'Αμυντ. ριμπ.' },
+  { k: 'st', t: 'Κλεψίματα' }, { k: 'bl', t: 'Κοψίματα' }, { k: 'to', t: 'Λάθη' }, { k: 'pf', t: 'Φάουλ' },
+  { k: 'fd', t: 'Κερδ. φάουλ' }, { k: 'efg', t: 'eFG%' }, { k: 'ts', t: 'TS%' }, { k: 'at', t: 'Ασίστ/Λάθη' },
+];
+const IMG_DEFAULT = ['pts', 'reb', 'as', 'pir', '2p', '3p', 'ft', 'min', 'pm'];
+function imgOpts() {
+  S.img = S.img || {};
+  if (!Array.isArray(S.img.stats)) S.img.stats = [...IMG_DEFAULT];
+  if (S.img.logo === undefined) S.img.logo = true;
+  if (S.img.score === undefined) S.img.score = true;
+  return S.img;
+}
+function imgItems(d) {
+  const { s, a, sec } = d, sel = imgOpts().stats;
+  const sh = (m, at) => ({ v: `${m}/${at}`, sub: at ? Math.round(m / at * 100) + '%' : '–' });
+  const pc = v => v == null ? '–' : (Math.round(v * 10) / 10) + '%';
+  const V = {
+    pts: { l: 'ΠΟΝΤΟΙ', v: s.pts }, reb: { l: 'ΡΙΜΠΑΟΥΝΤ', v: s.or + s.dr }, as: { l: 'ΑΣΙΣΤ', v: s.as }, pir: { l: 'PIR', v: s.pir },
+    '2p': { l: '2Π', ...sh(s['2m'], s['2a']) }, '3p': { l: '3Π', ...sh(s['3m'], s['3a']) }, ft: { l: 'ΒΟΛΕΣ', ...sh(s['1m'], s['1a']) },
+    fg: { l: 'ΕΝΤΟΣ ΠΕΔ.', ...sh(a.fgm, a.fga) }, min: { l: 'ΛΕΠΤΑ', v: fmtMin(sec) }, pm: { l: '+/-', v: signed(s.pm) },
+    or: { l: 'ΕΠ. ΡΙΜΠ.', v: s.or }, dr: { l: 'ΑΜ. ΡΙΜΠ.', v: s.dr }, st: { l: 'ΚΛΕΨΙΜΑΤΑ', v: s.st }, bl: { l: 'ΚΟΨΙΜΑΤΑ', v: s.bl },
+    to: { l: 'ΛΑΘΗ', v: s.to }, pf: { l: 'ΦΑΟΥΛ', v: s.pf }, fd: { l: 'ΚΕΡΔ. ΦΑΟΥΛ', v: s.fd },
+    efg: { l: 'eFG%', v: pc(a.efg) }, ts: { l: 'TS%', v: pc(a.ts) }, at: { l: 'ΑΣ/ΛΑΘ', v: atF(s) },
+  };
+  return IMG_STATS.filter(x => sel.includes(x.k)).map(x => V[x.k]);
 }
 
 /* ---------- views ---------- */
